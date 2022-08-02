@@ -22,7 +22,6 @@ const styles = makeStyles(() => ({
   btn: {
     fontFamily: "Open Sans",
     fontStyle: "normal",
-    marginTop: "40px !important",
     backgroundColor: "#00A29A !important",
   },
 
@@ -93,7 +92,7 @@ function StaffLogin() {
         direction="row"
         alignItems="center"
         justifyContent="flex-start"
-        rowSpacing={0}
+        rowSpacing={2}
         columnSpacing={{ xs: 2, md: 2 }}
       >
         <Grid item xs={12}>
@@ -101,13 +100,12 @@ function StaffLogin() {
             label="Enter Username"
             variant="outlined"
             name="username"
-            style={{ marginTop: "30px" }}
             handleChange={handleChange}
             size="small"
             fullWidth
           />
         </Grid>
-        <Grid item xs={12} style={{ marginTop: "20px" }}>
+        <Grid item xs={12}>
           <CustomPassword
             name="password"
             label="Password"
@@ -126,7 +124,7 @@ function StaffLogin() {
             LOGIN
           </Button>
         </Grid>
-        <Grid item xs={10} md={6} style={{ marginTop: "30px" }}>
+        <Grid item xs={10} md={6} sx={{ marginBottom: "80px" }}>
           <a href="/ForgotPassword" className={classes.anchorTag}>
             Forgot Password ?
           </a>

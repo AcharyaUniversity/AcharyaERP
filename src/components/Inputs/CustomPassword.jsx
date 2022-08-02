@@ -17,13 +17,13 @@ export default function CustomPassword({
   ...props
 }) {
   const handleClickShowPassword = () => {
-    setValues({
-      ...values,
-      showPassword: !values.showPassword,
-    });
+    setShowPassword((prev) => ({
+      ...prev,
+      showPassword: !prev.showPassword,
+    }));
   };
 
-  const [values, setValues] = useState({ showPassword: "" });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -37,7 +37,7 @@ export default function CustomPassword({
         size="small"
         variant="outlined"
         name={name}
-        type={values.showPassword ? "text" : "password"}
+        type={showPassword.showPassword ? "text" : "password"}
         value={value}
         onChange={handleChange}
         error={!!error}
@@ -49,7 +49,7 @@ export default function CustomPassword({
               onMouseDown={handleMouseDownPassword}
               edge="end"
             >
-              {values.showPassword ? <VisibilityOff /> : <Visibility />}
+              {showPassword.showPassword ? <VisibilityOff /> : <Visibility />}
             </IconButton>
           </InputAdornment>
         }

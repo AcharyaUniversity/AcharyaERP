@@ -4,6 +4,7 @@ import { makeStyles } from "@mui/styles";
 import StaffLogin from "../../components/LoginForms/StaffLogin";
 import College from "../../images/College.jpg";
 import logo4 from "../../images/logo4.png";
+import background1 from "../../images/background1.jpeg";
 import StudentLogin from "../../components/LoginForms/StudentLogin";
 const styles = makeStyles(() => ({
   form: {
@@ -18,11 +19,13 @@ const styles = makeStyles(() => ({
     cursor: "none",
   },
   paperStyle: {
-    width: "350px",
+    width: "350px !important",
     height: "440px",
     padding: "22px",
-    margin: "100px 40px",
+    margin: "100px 40px !important",
     borderRadius: "30px !important",
+    background: "white",
+    boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px;",
   },
   paperStyle1: {
     borderRadius: "22px !important",
@@ -38,13 +41,7 @@ const styles = makeStyles(() => ({
   },
   btnStudent: {
     fontFamily: "Open Sans",
-    marginTop: "40px !important",
-  },
-  anchorTag: {
-    textDecoration: "none",
-    color: "#00A29A !important",
-    fontFamily: "Open Sans",
-    fontStyle: "normal",
+    marginBottom: "5px !important",
   },
   signIn: {
     position: "absolute",
@@ -69,69 +66,60 @@ function Login() {
       <Box
         component="form"
         className={classes.form}
+        align="right"
+        justifyContent="right"
         sx={{
           background: {
-            xs: "block",
-            md: "block",
+            xs: `url(${background1})`,
+            md: `url(${background1})`,
             lg: `url(${College})`,
           },
         }}
       >
-        <Grid container>
-          <Grid item xs={12}>
-            <Grid container align="right" justifyContent="right">
-              <Paper elevation={8} className={classes.paperStyle}>
-                <Grid container>
-                  <Grid item xs={12} align="center">
-                    <Paper className={classes.paperStyle1}>
-                      <Grid item xs={12} align="center">
-                        <img
-                          src={logo4}
-                          alt=""
-                          style={{ width: "54px", marginTop: "4px" }}
-                        />
-                      </Grid>
-                    </Paper>
-                  </Grid>
+        <Grid container className={classes.paperStyle}>
+          <Grid item xs={12} align="center">
+            <Paper className={classes.paperStyle1}>
+              <Grid container>
+                <Grid item xs={12} align="center">
+                  <img
+                    src={logo4}
+                    alt=""
+                    style={{ width: "54px", marginTop: "4px" }}
+                  />
                 </Grid>
-
-                <Grid item xs={6} className={classes.signIn}>
-                  <p>Sign In</p>
-                </Grid>
-
-                <Grid
-                  item
-                  xs={12}
-                  align="center"
-                  className={classes.btnStudent}
-                >
-                  <Button
-                    variant="text"
-                    onClick={() => setShowStaff("staff")}
-                    style={{
-                      color: showStaff == "student" ? "#cccccc" : "#76546E",
-                    }}
-                    id="font"
-                  >
-                    <h4> Staff</h4>
-                  </Button>
-                  |
-                  <Button
-                    variant="text"
-                    id="fonts"
-                    onClick={() => setShowStaff("student")}
-                    style={{
-                      color: showStaff == "staff" ? "#cccccc" : "#76546E",
-                    }}
-                  >
-                    <h4> Student</h4>
-                  </Button>
-                </Grid>
-
-                {showStaff == "staff" ? <StaffLogin /> : <StudentLogin />}
-              </Paper>
-            </Grid>
+              </Grid>
+            </Paper>
           </Grid>
+
+          <Grid item xs={4} className={classes.signIn}>
+            <p>Sign In</p>
+          </Grid>
+
+          <Grid item xs={12} align="center" className={classes.btnStudent}>
+            <Button
+              variant="text"
+              onClick={() => setShowStaff("staff")}
+              style={{
+                color: showStaff == "student" ? "#cccccc" : "#76546E",
+              }}
+              id="font"
+            >
+              <h4> Staff</h4>
+            </Button>
+            |
+            <Button
+              variant="text"
+              id="fonts"
+              onClick={() => setShowStaff("student")}
+              style={{
+                color: showStaff == "staff" ? "#cccccc" : "#76546E",
+              }}
+            >
+              <h4> Student</h4>
+            </Button>
+          </Grid>
+
+          {showStaff == "staff" ? <StaffLogin /> : <StudentLogin />}
         </Grid>
       </Box>
     </>
