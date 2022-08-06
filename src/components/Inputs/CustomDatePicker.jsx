@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TextField } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -12,7 +13,23 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function CustomDatePicker({ value, handleChange, error, ...props }) {
+// name: string
+// value: Date | null
+// handleChangeAdvance: () => void
+// setFormValid?: () => void
+// required?: boolean
+// ...props? any additional props to mui DatePicker
+
+function CustomDatePicker({
+  name,
+  value,
+  handleChangeAdvance,
+  setFormValid = () => {},
+  required = false,
+  ...props
+}) {
+  const [showError, setShowError] = useState(false);
+
   const classes = useStyles();
 
   return (
@@ -20,19 +37,26 @@ function CustomDatePicker({ value, handleChange, error, ...props }) {
       <DatePicker
         value={value}
         inputFormat="dd/MM/yyyy"
-        onChange={handleChange}
+        onChange={(val) => {
+          handleChangeAdvance(name, val);
+          setFormValid((prev) => ({ ...prev, [name]: true }));
+          setShowError(false);
+        }}
         renderInput={(params) => (
           <TextField
-            required
+            required={required}
             size="small"
             fullWidth
             helperText="dd/mm/yyyy"
+            onBlur={() => (value ? setShowError(false) : setShowError(true))}
             {...params}
           />
         )}
         {...props}
       />
-      {error && <p className={classes.errorText}>{error}</p>}
+      {required && showError && (
+        <p className={classes.errorText}>This field is required</p>
+      )}
     </LocalizationProvider>
   );
 }

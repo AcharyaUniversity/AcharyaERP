@@ -40,6 +40,7 @@ function ForgotPassword() {
   }
   const handleClose = () => {
     setOpen(false);
+    window.location.href = "/";
   };
 
   const onSubmit = () => {

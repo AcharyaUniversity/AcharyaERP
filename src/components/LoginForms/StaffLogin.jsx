@@ -5,6 +5,7 @@ import ApiUrl from "../../services/Api";
 import background from "../../images/background.jpeg";
 import CustomTextField from "../../components/Inputs/CustomTextField";
 import CustomPassword from "../../components/Inputs/CustomPassword";
+import CustomSnackbar from "../../components/CustomSnackbar";
 import axios from "axios";
 const styles = makeStyles(() => ({
   form: {
@@ -36,12 +37,27 @@ const styles = makeStyles(() => ({
 function StaffLogin() {
   const [values, setValues] = useState({
     active: true,
+    username: "",
   });
+  const [formValid, setFormValid] = useState({
+    username: false,
+  });
+
+  const [submitError, setSubmitError] = useState(true);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const classes = styles();
 
   function authenticateErp(e) {
     e.preventDefault();
+    if (Object.values(formValid).includes(false)) {
+      setSubmitError(true);
+      console.log("failed");
+      setSnackbarOpen(true);
+    } else {
+      setSubmitError(false);
+      console.log("submitted");
+    }
     axios
       .post(`${ApiUrl}/authenticate`, values, {
         headers: {
@@ -95,14 +111,25 @@ function StaffLogin() {
         rowSpacing={2}
         columnSpacing={{ xs: 2, md: 2 }}
       >
+        <CustomSnackbar
+          open={snackbarOpen}
+          setOpen={setSnackbarOpen}
+          severity={submitError ? "error" : "success"}
+          message={
+            submitError ? "Please fill all required fields" : "Form submitted"
+          }
+        />
         <Grid item xs={12}>
           <CustomTextField
-            label="Enter Username"
-            variant="outlined"
             name="username"
+            label="Enter Username"
+            value={values.username}
             handleChange={handleChange}
-            size="small"
             fullWidth
+            errors={["Invalid Username"]}
+            checks={[values.username !== ""]}
+            setFormValid={setFormValid}
+            required
           />
         </Grid>
         <Grid item xs={12}>

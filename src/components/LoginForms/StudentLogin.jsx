@@ -4,6 +4,7 @@ import { makeStyles } from "@mui/styles";
 import background from "../../images/background.jpeg";
 import CustomTextField from "../../components/Inputs/CustomTextField";
 import CustomPassword from "../../components/Inputs/CustomPassword";
+import CustomSnackbar from "../../components/CustomSnackbar";
 import axios from "axios";
 const styles = makeStyles(() => ({
   form: {
@@ -36,11 +37,26 @@ const styles = makeStyles(() => ({
 function StudentLogin() {
   const [values, setValues] = useState({
     active: true,
+    username: "",
   });
+  const [formValid, setFormValid] = useState({
+    username: false,
+  });
+
+  const [submitError, setSubmitError] = useState(true);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const classes = styles();
 
   function authenticateStudent() {
+    if (Object.values(formValid).includes(false)) {
+      setSubmitError(true);
+      console.log("failed");
+      setSnackbarOpen(true);
+    } else {
+      setSubmitError(false);
+      console.log("submitted");
+    }
     alert("Still api is not created");
     axios
       .post(``, values, {
@@ -94,14 +110,25 @@ function StudentLogin() {
         justifyContent="flex-start"
         rowSpacing={2}
       >
+        <CustomSnackbar
+          open={snackbarOpen}
+          setOpen={setSnackbarOpen}
+          severity={submitError ? "error" : "success"}
+          message={
+            submitError ? "Please fill all required fields" : "Form submitted"
+          }
+        />
         <Grid item xs={12}>
           <CustomTextField
             name="username"
-            label="Enter AUID"
-            variant="outlined"
+            label="Enter Auid"
+            value={values.username}
             handleChange={handleChange}
-            size="small"
             fullWidth
+            errors={["Invalid AUID"]}
+            checks={[values.username !== ""]}
+            setFormValid={setFormValid}
+            required
           />
         </Grid>
         <Grid item xs={12}>
