@@ -12,6 +12,9 @@ import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import FormExample from "./containers/examples/FormExample";
+import VoucherHeadAssignmentCreation from "./containers/VoucherHeadAssignment/VoucherHeadAssignmentCreation";
+import VoucherHeadAssignmentIndex from "./containers/VoucherHeadAssignment/VoucherHeadAssignmentIndex";
+import VoucherHeadAssignmentUpdate from "./containers/VoucherHeadAssignment/VoucherHeadAssignmentUpdate";
 
 function App() {
   return (
@@ -53,6 +56,21 @@ function App() {
                 }
               />
               <Route exact path="/online/nav1/nav2" element={<>Nav2</>} />
+              <Route
+                exact
+                path="/VoucherHeadAssignmentCreation"
+                element={<VoucherHeadAssignmentCreation />}
+              ></Route>
+              <Route
+                exact
+                path="/VoucherHeadAssignmentIndex"
+                element={<VoucherHeadAssignmentIndex />}
+              ></Route>
+              <Route
+                exact
+                path="/VoucherHeadAssignmentUpdate/:id"
+                element={<VoucherHeadAssignmentUpdate />}
+              ></Route>
             </Route>
           </Routes>
         </Router>

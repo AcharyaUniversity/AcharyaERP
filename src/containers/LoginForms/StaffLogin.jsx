@@ -60,10 +60,7 @@ function StaffLogin({ setAlertOpen, setAlertMessage }) {
         })
         .then((response) => {
           console.log(response);
-          if (
-            values.username === response.data.data.userName &&
-            values.password === response.data.data.userName
-          ) {
+          if (values.username === response.data.data.userName) {
             localStorage.setItem(
               "authenticate",
               JSON.stringify({
