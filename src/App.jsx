@@ -15,6 +15,8 @@ import FormExample from "./containers/examples/FormExample";
 import VoucherHeadAssignmentCreation from "./containers/VoucherHeadAssignment/VoucherHeadAssignmentCreation";
 import VoucherHeadAssignmentIndex from "./containers/VoucherHeadAssignment/VoucherHeadAssignmentIndex";
 import VoucherHeadAssignmentUpdate from "./containers/VoucherHeadAssignment/VoucherHeadAssignmentUpdate";
+import UserCreation from "./containers/User/UserCreation";
+import UserIndex from "./containers/User/UserIndex";
 
 function App() {
   return (
@@ -71,6 +73,12 @@ function App() {
                 path="/VoucherHeadAssignmentUpdate/:id"
                 element={<VoucherHeadAssignmentUpdate />}
               ></Route>
+              <Route
+                exact
+                path="/UserCreation"
+                element={<UserCreation />}
+              ></Route>
+              <Route exact path="/UserIndex" element={<UserIndex />}></Route>
             </Route>
           </Routes>
         </Router>
