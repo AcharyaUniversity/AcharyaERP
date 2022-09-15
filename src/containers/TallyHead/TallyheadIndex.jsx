@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { React, useState, useEffect } from "react";
 import GridIndex from "../../components/GridIndex";
+import CustomModal from "../../components/CustomModal";
+import axios from "axios";
+import ApiUrl from "../../services/Api";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import { Check, HighlightOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Box } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
-import axios from "axios";
-import ApiUrl from "../../services/Api";
-import CustomModal from "../../components/CustomModal";
-function EmptypeIndex() {
+import EditIcon from "@mui/icons-material/Edit";
+import { Button, Box } from "@mui/material";
+function TallyheadIndex() {
   const [rows, setRows] = useState([]);
   const [modalContent, setModalContent] = useState({
     title: "",
@@ -19,9 +19,9 @@ function EmptypeIndex() {
   const [modalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
   const getData = async () => {
-    axios
+    await axios
       .get(
-        `${ApiUrl}/employee/fetchAllEmployeeTypeDetails?page=${0}&page_size=${100}&sort=createdDate`
+        `${ApiUrl}/finance/FetchAllTallyHeadDetail?page=${0}&page_size=${100}&sort=created_date`
       )
       .then((Response) => {
         setRows(Response.data.data.Paginated_data.content);
@@ -36,17 +36,17 @@ function EmptypeIndex() {
     setModalOpen(true);
     const handleToggle = () => {
       if (params.row.active === true) {
-        axios.delete(`${ApiUrl}/employee/EmployeeType/${id}`).then((res) => {
-          if (res.status === 200) {
+        axios.delete(`${ApiUrl}/finance/TallyHead/${id}`).then((res) => {
+          if (res.status == 200) {
             getData();
             setModalOpen(false);
           }
         });
       } else {
         axios
-          .delete(`${ApiUrl}/employee/activateEmployeeType/${id}`)
+          .delete(`${ApiUrl}/finance/ActivateTallyHead/${id}`)
           .then((res) => {
-            if (res.status === 200) {
+            if (res.status == 200) {
               getData();
               setModalOpen(false);
             }
@@ -73,22 +73,22 @@ function EmptypeIndex() {
   };
 
   const columns = [
-    { field: "empType", headerName: "Employee Type", flex: 1 },
-    { field: "empTypeShortName", headerName: "Short Name", flex: 1 },
-    { field: "createdUsername", headerName: "Created By", flex: 1 },
+    { field: "tally_fee_head", headerName: "Tally Head", flex: 1 },
+    { field: "remarks", headerName: "Remarks", flex: 1 },
+    { field: "created_username", headerName: "Created By", flex: 1 },
     {
-      field: "createdDate",
+      field: "created_date",
       headerName: "Created Date",
       flex: 1,
       type: "date",
-      valueGetter: (params) => new Date(params.row.createdDate),
+      valueGetter: (params) => new Date(params.row.created_date),
     },
     {
       field: "created_by",
       headerName: "Update",
       renderCell: (params) => {
         return (
-          <Link to={`/InstituteMaster/Emptype/Update/${params.row.id}`}>
+          <Link to={`/AccountMaster/Tallyhead/Update/${params.row.id}`}>
             <GridActionsCellItem icon={<EditIcon />} label="Update" />
           </Link>
         );
@@ -133,7 +133,7 @@ function EmptypeIndex() {
           buttons={modalContent.buttons}
         />
         <Button
-          onClick={() => navigate("/InstituteMaster/Emptype/New")}
+          onClick={() => navigate("/AccountMaster/Tallyhead/New")}
           variant="contained"
           disableElevation
           sx={{ position: "absolute", right: 0, top: -57, borderRadius: 2 }}
@@ -146,4 +146,4 @@ function EmptypeIndex() {
     </>
   );
 }
-export default EmptypeIndex;
+export default TallyheadIndex;

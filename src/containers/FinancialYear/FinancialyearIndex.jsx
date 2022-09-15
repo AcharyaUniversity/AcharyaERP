@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { React, useState, useEffect } from "react";
 import GridIndex from "../../components/GridIndex";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import { Check, HighlightOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Box } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import { Button, Box } from "@mui/material";
 import axios from "axios";
 import ApiUrl from "../../services/Api";
 import CustomModal from "../../components/CustomModal";
-function EmptypeIndex() {
+function FinancialyearIndex() {
   const [rows, setRows] = useState([]);
   const [modalContent, setModalContent] = useState({
     title: "",
@@ -21,7 +21,7 @@ function EmptypeIndex() {
   const getData = async () => {
     axios
       .get(
-        `${ApiUrl}/employee/fetchAllEmployeeTypeDetails?page=${0}&page_size=${100}&sort=createdDate`
+        `${ApiUrl}/fetchAllFinancialYearDetails?page=${0}&page_size=${100}&sort=created_date`
       )
       .then((Response) => {
         setRows(Response.data.data.Paginated_data.content);
@@ -36,21 +36,19 @@ function EmptypeIndex() {
     setModalOpen(true);
     const handleToggle = () => {
       if (params.row.active === true) {
-        axios.delete(`${ApiUrl}/employee/EmployeeType/${id}`).then((res) => {
-          if (res.status === 200) {
+        axios.delete(`${ApiUrl}/FinancialYear/${id}`).then((res) => {
+          if (res.status == 200) {
             getData();
             setModalOpen(false);
           }
         });
       } else {
-        axios
-          .delete(`${ApiUrl}/employee/activateEmployeeType/${id}`)
-          .then((res) => {
-            if (res.status === 200) {
-              getData();
-              setModalOpen(false);
-            }
-          });
+        axios.delete(`${ApiUrl}/activateFinancialYear/${id}`).then((res) => {
+          if (res.status == 200) {
+            getData();
+            setModalOpen(false);
+          }
+        });
       }
     };
     params.row.active === true
@@ -73,22 +71,35 @@ function EmptypeIndex() {
   };
 
   const columns = [
-    { field: "empType", headerName: "Employee Type", flex: 1 },
-    { field: "empTypeShortName", headerName: "Short Name", flex: 1 },
-    { field: "createdUsername", headerName: "Created By", flex: 1 },
+    { field: "financial_year", headerName: "Financial Year", flex: 1 },
     {
-      field: "createdDate",
+      field: "from_date",
+      headerName: "From Date",
+      flex: 1,
+      type: "date",
+      valueGetter: (params) => new Date(params.row.from_date),
+    },
+    {
+      field: "to_date",
+      headerName: "To Date",
+      flex: 1,
+      type: "date",
+      valueGetter: (params) => new Date(params.row.to_date),
+    },
+    { field: "created_username", headerName: "Created By", flex: 1 },
+    {
+      field: "created_date",
       headerName: "Created Date",
       flex: 1,
       type: "date",
-      valueGetter: (params) => new Date(params.row.createdDate),
+      valueGetter: (params) => new Date(params.row.created_date),
     },
     {
       field: "created_by",
       headerName: "Update",
       renderCell: (params) => {
         return (
-          <Link to={`/InstituteMaster/Emptype/Update/${params.row.id}`}>
+          <Link to={`/AccountMaster/Financialyear/Update/${params.row.id}`}>
             <GridActionsCellItem icon={<EditIcon />} label="Update" />
           </Link>
         );
@@ -133,7 +144,7 @@ function EmptypeIndex() {
           buttons={modalContent.buttons}
         />
         <Button
-          onClick={() => navigate("/InstituteMaster/Emptype/New")}
+          onClick={() => navigate("/AccountMaster/Financialyear/New")}
           variant="contained"
           disableElevation
           sx={{ position: "absolute", right: 0, top: -57, borderRadius: 2 }}
@@ -141,9 +152,10 @@ function EmptypeIndex() {
         >
           Create
         </Button>
+
         <GridIndex rows={rows} columns={columns} />
       </Box>
     </>
   );
 }
-export default EmptypeIndex;
+export default FinancialyearIndex;

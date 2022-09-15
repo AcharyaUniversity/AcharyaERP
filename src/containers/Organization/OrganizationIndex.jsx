@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import GridIndex from "../../components/GridIndex";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import { Check, HighlightOff } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import ApiUrl from "../../services/Api";
 import CustomModal from "../../components/CustomModal";
-import { Button } from "@mui/material";
+import { Button, Box } from "@mui/material";
 function OrganizationIndex() {
   const [rows, setRows] = useState([]);
   const [modalContent, setModalContent] = useState({
@@ -16,6 +17,7 @@ function OrganizationIndex() {
     buttons: [],
   });
   const [modalOpen, setModalOpen] = useState(false);
+  const navigate = useNavigate();
   const getData = async () => {
     axios
       .get(
@@ -120,22 +122,25 @@ function OrganizationIndex() {
   ];
   return (
     <>
-      <CustomModal
-        open={modalOpen}
-        setOpen={setModalOpen}
-        title={modalContent.title}
-        message={modalContent.message}
-        buttons={modalContent.buttons}
-      />
-      <div style={{ textAlign: "right" }}>
-        <Link
-          to="/InstituteMaster/Organization/Creation"
-          style={{ textDecoration: "none" }}
+      <Box sx={{ position: "relative", mt: 2 }}>
+        <CustomModal
+          open={modalOpen}
+          setOpen={setModalOpen}
+          title={modalContent.title}
+          message={modalContent.message}
+          buttons={modalContent.buttons}
+        />
+        <Button
+          onClick={() => navigate("/InstituteMaster/Organization/New")}
+          variant="contained"
+          disableElevation
+          sx={{ position: "absolute", right: 0, top: -57, borderRadius: 2 }}
+          startIcon={<AddIcon />}
         >
-          <Button variant="contained">Create</Button>
-        </Link>
-      </div>
-      <GridIndex rows={rows} columns={columns} />
+          Create
+        </Button>
+        <GridIndex rows={rows} columns={columns} />
+      </Box>
     </>
   );
 }

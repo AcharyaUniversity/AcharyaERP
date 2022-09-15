@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, Tab } from "@mui/material";
 import GroupIndex from "../containers/Group/GroupIndex";
 import LedgerIndex from "../containers/Ledger/LedgerIndex";
 import TallyheadIndex from "../containers/TallyHead/TallyheadIndex";
 import FinancialyearIndex from "../containers/FinancialYear/FinancialyearIndex";
-
+import useBreadcrumbs from "../hooks/useBreadcrumbs";
 function AccountMaster() {
   const [value, setValue] = useState(0);
-
+  const setCrumbs = useBreadcrumbs();
+  useEffect(() => setCrumbs([{ name: "AccountMaster" }]), []);
   const handleChange = (e, newValue) => {
     setValue(newValue);
   };

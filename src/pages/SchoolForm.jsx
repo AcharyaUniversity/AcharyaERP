@@ -429,6 +429,9 @@ function SchoolForm() {
                 },
               ]}
               handleChange={handleChange}
+              errord={["This field is required"]}
+              checks={[values.webStatus !== ""]}
+              required
             />
           </Grid>
           <Grid item xs={12}>

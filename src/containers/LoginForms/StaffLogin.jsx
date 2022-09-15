@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Grid, Button, Box } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import ApiUrl from "../../services/Api";
@@ -43,13 +43,6 @@ function StaffLogin({ setAlertOpen, setAlertMessage }) {
   const classes = styles();
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log("HAi");
-    axios.get(`${ApiUrl}/employee/graduation`).then((res) => {
-      console.log(res);
-    });
-  }, []);
 
   function authenticateErp(e) {
     e.preventDefault();

@@ -12,8 +12,7 @@ import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import FormExample from "./containers/examples/FormExample";
-import SchoolCreation from "./containers/School/SchoolCreation";
-import SchoolUpdate from "./containers/School/SchoolUpdate";
+
 import OrganizationCreation from "./containers/Organization/OrganizationCreation";
 import OrganizationUpdate from "./containers/Organization/OrganizationUpdate";
 import JobtypeCreation from "./containers/JobType/JobtypeCreation";
@@ -21,8 +20,17 @@ import JobtypeUpdate from "./containers/JobType/JobtypeUpdate";
 import EmptypeCreation from "./containers/EmployeeType/EmptypeCreation";
 import EmptypeUpdate from "./containers/EmployeeType/EmptypeUpdate";
 
+import TallyheadCreation from "./containers/TallyHead/TallyheadCreation";
+import TallyheadUpdate from "./containers/TallyHead/TallyheadUpdate";
+import FinancialyearCreation from "./containers/FinancialYear/FinancialyearCreation";
+import FinancialyearUpdate from "./containers/FinancialYear/FinancialyearUpdate";
+import VendorCreation from "./containers/Vendor/VendorCreation";
+import VendorIndex from "./containers/Vendor/VendorIndex";
+import VendorUpdate from "./containers/Vendor/VendorUpdate";
+import VendorOb from "./containers/Vendor/VendorOb";
 import InstituteMaster from "./pages/InstituteMaster";
-
+import AccountMaster from "./pages/AccountMaster";
+import View from "./containers/Vendor/View";
 import ModuleCreation from "./containers/Module/ModuleCreation";
 import ModuleIndex from "./containers/Module/ModuleIndex";
 import ModuleUpdate from "./containers/Module/ModuleUpdate";
@@ -33,7 +41,13 @@ import SubmenuCreation from "./containers/SubMenu/SubmenuCreation";
 import SubmenuIndex from "./containers/SubMenu/SubmenuIndex";
 import SubmenuUpdate from "./containers/SubMenu/SubmenuUpdate";
 import SchoolForm from "./pages/SchoolForm";
-
+import GroupForm from "./pages/GroupForm";
+import LedgerForm from "./pages/LedgerForm";
+import TallyheadForm from "./pages/TallyheadForm";
+import OrganizationForm from "./pages/OrganizationForm";
+import JobtypeForm from "./pages/JobtypeForm";
+import EmptypeForm from "./pages/EmptypeForm";
+import FinancialyearForm from "./pages/FinancialyearForm";
 function App() {
   return (
     <ThemeContextProvider>
@@ -80,46 +94,55 @@ function App() {
                 path="/InstituteMaster"
                 element={<InstituteMaster />}
               />
-
+              <Route exact path="/AccountMaster" element={<AccountMaster />} />
               <Route
                 exact
-                path="/InstituteMaster/Jobtype/Creation"
-                element={<JobtypeCreation />}
+                path="/VendorIndex/VendorCreation"
+                element={<VendorCreation />}
+              />
+              <Route exact path="/VendorIndex/View/:id" element={<View />} />
+
+              <Route exact path="/VendorIndex" element={<VendorIndex />} />
+              <Route
+                exact
+                path="/VendorIndex/VendorUpdate/:id"
+                element={<VendorUpdate />}
               />
 
               <Route
                 exact
-                path="/InstituteMaster/Emptype/Creation"
-                element={<EmptypeCreation />}
+                path="/InstituteMaster/Jobtype/New"
+                element={<JobtypeForm />}
+              />
+
+              <Route
+                exact
+                path="/InstituteMaster/Emptype/New"
+                element={<EmptypeForm />}
               />
 
               <Route
                 exact
                 path="/InstituteMaster/Emptype/Update/:id"
-                element={<EmptypeUpdate />}
+                element={<EmptypeForm />}
               />
 
-              <Route
-                exact
-                path="/InstituteMaster/Jobtype/Creation"
-                element={<JobtypeCreation />}
-              />
               <Route
                 exact
                 path="/InstituteMaster/Jobtype/Update/:id"
-                element={<JobtypeUpdate />}
+                element={<JobtypeForm />}
               />
 
               <Route
                 exact
-                path="/InstituteMaster/Organization/Creation"
-                element={<OrganizationCreation />}
+                path="/InstituteMaster/Organization/New"
+                element={<OrganizationForm />}
               />
 
               <Route
                 exact
                 path="/InstituteMaster/Organization/Update/:id"
-                element={<OrganizationUpdate />}
+                element={<OrganizationForm />}
               />
 
               <Route
@@ -131,6 +154,56 @@ function App() {
                 exact
                 path="/InstituteMaster/School/Update/:id"
                 element={<SchoolForm />}
+              />
+
+              <Route
+                exact
+                path="/AccountMaster/Group/New"
+                element={<GroupForm />}
+              />
+
+              <Route
+                exact
+                path="/AccountMaster/Group/Update/:id"
+                element={<GroupForm />}
+              />
+              <Route
+                exact
+                path="/AccountMaster/Ledger/New"
+                element={<LedgerForm />}
+              />
+
+              <Route
+                exact
+                path="/AccountMaster/Ledger/Update/:id"
+                element={<LedgerForm />}
+              />
+              <Route
+                exact
+                path="/AccountMaster/Tallyhead/New"
+                element={<TallyheadForm />}
+              />
+
+              <Route
+                exact
+                path="/AccountMaster/Tallyhead/Update/:id"
+                element={<TallyheadForm />}
+              />
+              <Route
+                exact
+                path="/AccountMaster/Financialyear/New"
+                element={<FinancialyearForm />}
+              />
+
+              <Route
+                exact
+                path="/AccountMaster/Financialyear/Update/:id"
+                element={<FinancialyearForm />}
+              />
+              <Route
+                exact
+                path="/VendorIndex/VendorOb/:id"
+                element={<VendorOb />}
               />
 
               <Route exact path="/head" element={<>Head</>} />
