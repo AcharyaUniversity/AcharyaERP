@@ -18,10 +18,13 @@ import JobtypeCreation from "./containers/JobType/JobtypeCreation";
 import JobtypeUpdate from "./containers/JobType/JobtypeUpdate";
 import EmptypeCreation from "./containers/EmployeeType/EmptypeCreation";
 import EmptypeUpdate from "./containers/EmployeeType/EmptypeUpdate";
-
+import TranscriptDetails from "./containers/TranscriptDetails";
 import InstituteMaster from "./pages/InstituteMaster";
-
 import SchoolForm from "./pages/SchoolForm";
+
+import TranscriptAssignmentForm from "./pages/TranscriptAssignmentForm";
+import TranscriptMaster from "./pages/TranscriptMaster";
+import TranscriptForm from "./pages/TranscriptForm";
 
 function App() {
   return (
@@ -43,7 +46,34 @@ function App() {
                 path="/InstituteMaster"
                 element={<InstituteMaster />}
               />
+              <Route
+                exact
+                path="/TranscriptMaster"
+                element={<TranscriptMaster />}
+              />
 
+              <Route
+                exact
+                path="/TranscriptMaster/Transcript/New"
+                element={<TranscriptForm />}
+              />
+              <Route
+                exact
+                path="/TranscriptMaster/Transcript/Update/:id"
+                element={<TranscriptForm />}
+              />
+
+              <Route
+                exact
+                path="/TranscriptMaster/TranscriptAssignment/Assign"
+                element={<TranscriptAssignmentForm />}
+              />
+
+              <Route
+                exact
+                path="/TranscriptDetails"
+                element={<TranscriptDetails />}
+              />
               <Route
                 exact
                 path="/InstituteMaster/Emptype/Creation"
