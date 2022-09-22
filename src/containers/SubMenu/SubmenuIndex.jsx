@@ -1,53 +1,56 @@
-import { React, useState, useEffect } from "react";
-import GridIndex from "../../components/GridIndex";
-import { GridActionsCellItem } from "@mui/x-data-grid";
-import { Check, HighlightOff } from "@mui/icons-material";
-import { Link } from "react-router-dom";
-import CustomMultipleAutocomplete from "../../components/Inputs/CustomMultipleAutocomplete";
-import EditIcon from "@mui/icons-material/Edit";
+import { useState, useEffect } from "react";
+import {
+  Grid,
+  Box,
+  IconButton,
+  List,
+  ListItemText,
+  Typography,
+  Alert,
+  Button,
+} from "@mui/material";
 import CustomModal from "../../components/CustomModal";
-import { Alert, Stack, Grid, Button } from "@mui/material";
-import ModalWrapper from "../../components/ModalWrapper";
 import axios from "axios";
 import ApiUrl from "../../services/Api";
-const initialValues = {
-  user_ids: [],
-};
-function SubmenuIndex() {
+import GridIndex from "../../components/GridIndex";
+import { Link, useNavigate } from "react-router-dom";
+import EditIcon from "@mui/icons-material/Edit";
+import NearMeTwoToneIcon from "@mui/icons-material/NearMeTwoTone";
+import { Check, HighlightOff } from "@mui/icons-material";
+import AssignmentIndRoundedIcon from "@mui/icons-material/AssignmentIndRounded";
+import ModalWrapper from "../../components/ModalWrapper";
+import CustomMultipleAutocomplete from "../../components/Inputs/CustomMultipleAutocomplete";
+const initialValues = { userIds: [] };
+const SubmenuIndex = () => {
   const [rows, setRows] = useState([]);
-  const [open, setOpen] = useState(false);
-
   const [modalContent, setModalContent] = useState({
     title: "",
     message: "",
     buttons: [],
   });
   const [modalOpen, setModalOpen] = useState(false);
-  const [storedata, setStoredata] = useState(initialValues);
-  const [assignedUserList, setAssignedUserList] = useState([]);
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [values, setValues] = useState(initialValues);
+  const [submenuId, setSubmenuId] = useState(null);
+  const [userOptions, setUserOptions] = useState([]);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [wrapperOpen, setWrapperOpen] = useState(false);
+  const [modalData, setModalData] = useState([]);
+  const [role, setRole] = useState([]);
 
-  const [AlertOpen, setAlertOpen] = useState(false);
-  const [allUsers, setAllUsers] = useState([]);
+  useEffect(() => {
+    getData();
+  }, []);
+
   const getData = async () => {
-    axios
+    await axios
       .get(
         `${ApiUrl}/fetchAllSubMenuDetails?page=${0}&page_size=${100}&sort=created_date`
       )
-      .then((Response) => {
-        setRows(Response.data.data.Paginated_data.content);
+      .then((res) => {
+        setRows(res.data.data.Paginated_data.content);
       });
-  };
-  useEffect(() => {
-    getData();
-    getUserDetails();
-  }, []);
-
-  const getUserDetails = () => {
-    axios.get(`${ApiUrl}/UserAuthentication`).then((res) => {
-      setAllUsers(
-        res.data.data.map((obj) => ({ value: obj.id, label: obj.username }))
-      );
-    });
   };
 
   const handleActive = (params) => {
@@ -55,19 +58,29 @@ function SubmenuIndex() {
     setModalOpen(true);
     const handleToggle = () => {
       if (params.row.active === true) {
-        axios.delete(`${ApiUrl}/SubMenu/${id}`).then((res) => {
-          if (res.status == 200) {
-            getData();
-            setModalOpen(false);
-          }
-        });
+        axios
+          .delete(`${ApiUrl}/SubMenu/${id}`)
+          .then((res) => {
+            if (res.status == 200) {
+              getData();
+              setModalOpen(false);
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
       } else {
-        axios.delete(`${ApiUrl}/activateSubMenu/${id}`).then((res) => {
-          if (res.status == 200) {
-            getData();
-            setModalOpen(false);
-          }
-        });
+        axios
+          .delete(`${ApiUrl}/activateSubMenu/${id}`)
+          .then((res) => {
+            if (res.status == 200) {
+              getData();
+              setModalOpen(false);
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
       }
     };
     params.row.active === true
@@ -89,46 +102,67 @@ function SubmenuIndex() {
         });
   };
 
-  const handleClosed = () => {
-    setOpen(false);
+  const roleList = (data) => {
+    setWrapperOpen(true);
+    setModalData(data);
+    axios
+      .get(`${ApiUrl}/fetchAllRoleDetails/${data.id}`)
+      .then((res) => {
+        setRole(res.data.data.RoleName);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
-
-  const handleOpen = (params) => {
-    setStoredata((prev) => ({
-      ...prev,
-      menu_id: params.row.menu_id,
-      active: true,
-      status: params.row.status,
-      submenu_desc: params.row.submenu_desc,
-      submenu_name: params.row.submenu_name,
-      submenu_id: params.row.id,
-    }));
+  const handleOpen = async (params) => {
     setOpen(true);
+    setSubmenuId(params.row.id);
+    await axios
+      .get(`${ApiUrl}/UserAuthentication`)
+      .then((res) => {
+        setUserOptions(
+          res.data.data.map((obj) => ({
+            value: obj.id,
+            label: obj.username,
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
     axios
       .get(`${ApiUrl}/getSubMenuRelatedUser/${params.row.id}`)
       .then((res) => {
-        setAssignedUserList(res.data.AssignedUser);
+        // setValues(res.data.data.AssignedUser);
+        // console.log(res.data.data.AssignedUser);
+        res.data.data.AssignedUser.forEach((keyName) => {
+          console.log(keyName);
+        });
       });
   };
-
-  const handleUserId = (name, newValue) => {
-    console.log(newValue);
-    setStoredata((prev) => ({
+  const handleChangeAdvance = (name, newValue) => {
+    setValues((prev) => ({
       ...prev,
       [name]: newValue.toString(),
     }));
   };
 
-  const update = (e) => {
-    e.preventDefault();
-
-    axios
-      .post(`${ApiUrl}/postUserDetails/${storedata.submenu_id}`, storedata)
+  const postUserDetails = async () => {
+    const temp = {};
+    temp.user_ids = values.userIds;
+    console.log(temp);
+    return false;
+    await axios
+      .post(`${ApiUrl}/postUserDetails/${submenuId}`, temp)
       .then((response) => {
         if (response.status == 200) {
           setAlertOpen(true);
+          setOpen(false);
         }
-        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
       });
   };
 
@@ -147,26 +181,36 @@ function SubmenuIndex() {
     },
     {
       headerName: "User Assignment",
-      field: "actions",
-      type: "actions",
-      getActions: (params) => [
-        <GridActionsCellItem
-          label="User Assignment"
-          icon={<EditIcon />}
-          onClick={() => handleOpen(params)}
-        />,
+      field: "submenu_id",
+      renderCell: (params) => [
+        <IconButton label="User Assignment" onClick={() => handleOpen(params)}>
+          <NearMeTwoToneIcon />
+        </IconButton>,
       ],
     },
     {
-      field: "id",
-      type: "actions",
-      flex: 1,
+      field: "modified_date",
+      headerName: "Roles",
+      renderCell: (params) => {
+        return (
+          <IconButton onClick={() => roleList(params.row)}>
+            <AssignmentIndRoundedIcon />
+          </IconButton>
+        );
+      },
+    },
+    {
+      field: "created_by",
       headerName: "Update",
-      getActions: (params) => [
-        <Link to={`/SubmenuUpdate/${params.row.id}`}>
-          <GridActionsCellItem icon={<EditIcon />} label="Update" />
-        </Link>,
-      ],
+      renderCell: (params) => {
+        return (
+          <Link to={`/SubmenuUpdate/${params.row.id}`}>
+            <IconButton>
+              <EditIcon />
+            </IconButton>
+          </Link>
+        );
+      },
     },
     {
       field: "active",
@@ -175,69 +219,115 @@ function SubmenuIndex() {
       type: "actions",
       getActions: (params) => [
         params.row.active === true ? (
-          <GridActionsCellItem
-            icon={<Check />}
+          <IconButton
             label="Result"
             style={{ color: "green" }}
             onClick={() => handleActive(params)}
           >
-            {params.active}
-          </GridActionsCellItem>
+            <Check />
+          </IconButton>
         ) : (
-          <GridActionsCellItem
-            icon={<HighlightOff />}
+          <IconButton
             label="Result"
             style={{ color: "red" }}
             onClick={() => handleActive(params)}
           >
-            {params.active}
-          </GridActionsCellItem>
+            <HighlightOff />
+          </IconButton>
         ),
       ],
     },
   ];
+
   return (
     <>
-      <CustomModal
-        open={modalOpen}
-        setOpen={setModalOpen}
-        title={modalContent.title}
-        message={modalContent.message}
-        buttons={modalContent.buttons}
-      />
+      <ModalWrapper
+        open={wrapperOpen}
+        title={modalData.submenu_name}
+        maxWidth={500}
+        setOpen={setWrapperOpen}
+      >
+        <Box component="form">
+          <Grid
+            container
+            alignItems="center"
+            justifyContent="flex-start"
+            rowSpacing={4}
+            columnSpacing={{ xs: 2, md: 4 }}
+          >
+            <Grid item xs={12} md={12}>
+              <Typography style={{ fontSize: "16px", fontWeight: "bold" }}>
+                Role List
+              </Typography>
+              <List>
+                {role.length > 0
+                  ? role.map((key, index) => {
+                      return (
+                        <ListItemText key={index}>{key.role_name}</ListItemText>
+                      );
+                    })
+                  : "No Records"}
+              </List>
+            </Grid>
+          </Grid>
+        </Box>
+      </ModalWrapper>
+
       <ModalWrapper
         open={open}
         maxWidth={1000}
-        setOpen={handleClosed}
-        label="User Assignment"
-        alertLabel="Updated Successfully"
+        setOpen={setOpen}
+        title="USER ASSIGNMENT"
       >
-        <Stack sx={{ width: "100%" }} spacing={2}>
-          <Grid item xs={12} md={6}>
-            <CustomMultipleAutocomplete
-              name="user_ids"
-              label="Users"
-              value={storedata.user_ids}
-              options={allUsers}
-              handleChangeAdvance={handleUserId}
-              errors={["This field is required"]}
-            />
-            {AlertOpen ? (
-              <Alert severity="success">Assigned Successfully</Alert>
-            ) : (
-              ""
-            )}
+        <Box component="form">
+          <Grid
+            container
+            alignItems="center"
+            justifyContent="flex-start"
+            rowSpacing={4}
+            columnSpacing={{ xs: 2, md: 4 }}
+          >
+            <Grid item xs={2} md={4}>
+              <CustomMultipleAutocomplete
+                name="userIds"
+                label="Users"
+                value={values.userIds}
+                options={userOptions}
+                handleChangeAdvance={handleChangeAdvance}
+                errors={["This field is required"]}
+              />
+              {alertOpen ? (
+                <Alert severity="success">Assigned Successfully</Alert>
+              ) : (
+                ""
+              )}
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Button
+                style={{ borderRadius: 7 }}
+                variant="contained"
+                color="primary"
+                onClick={postUserDetails}
+              >
+                ASSIGN
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={4}>
-            <Button variant="contained" onClick={update}>
-              ASSIGN
-            </Button>
-          </Grid>
-        </Stack>
+        </Box>
       </ModalWrapper>
 
-      <GridIndex rows={rows} columns={columns} />
+      <Box sx={{ position: "relative", mt: 2 }}>
+        <CustomModal
+          open={modalOpen}
+          setOpen={setModalOpen}
+          title={modalContent.title}
+          message={modalContent.message}
+          buttons={modalContent.buttons}
+        />
+        <GridIndex rows={rows} columns={columns} />
+      </Box>
     </>
   );
-}
+};
+
 export default SubmenuIndex;
