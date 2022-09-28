@@ -10,6 +10,7 @@ import {
   Button,
 } from "@mui/material";
 import CustomModal from "../../components/CustomModal";
+import CheckboxAutocomplete from "../../components/Inputs/CheckboxAutocomplete";
 import axios from "axios";
 import ApiUrl from "../../services/Api";
 import GridIndex from "../../components/GridIndex";
@@ -19,7 +20,8 @@ import NearMeTwoToneIcon from "@mui/icons-material/NearMeTwoTone";
 import { Check, HighlightOff } from "@mui/icons-material";
 import AssignmentIndRoundedIcon from "@mui/icons-material/AssignmentIndRounded";
 import ModalWrapper from "../../components/ModalWrapper";
-import CustomMultipleAutocomplete from "../../components/Inputs/CustomMultipleAutocomplete";
+import useAlert from "../../hooks/useAlert";
+
 const initialValues = { userIds: [] };
 const SubmenuIndex = () => {
   const [rows, setRows] = useState([]);
@@ -28,13 +30,14 @@ const SubmenuIndex = () => {
     message: "",
     buttons: [],
   });
+  const [submenuName, setSubmenuName] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState(initialValues);
   const [submenuId, setSubmenuId] = useState(null);
   const [userOptions, setUserOptions] = useState([]);
-  const [alertOpen, setAlertOpen] = useState(false);
+  const { setAlertMessage, setAlertOpen } = useAlert();
   const [wrapperOpen, setWrapperOpen] = useState(false);
   const [modalData, setModalData] = useState([]);
   const [role, setRole] = useState([]);
@@ -117,6 +120,7 @@ const SubmenuIndex = () => {
   const handleOpen = async (params) => {
     setOpen(true);
     setSubmenuId(params.row.id);
+    setSubmenuName(params.row.submenu_name);
     await axios
       .get(`${ApiUrl}/UserAuthentication`)
       .then((res) => {
@@ -134,11 +138,10 @@ const SubmenuIndex = () => {
     axios
       .get(`${ApiUrl}/getSubMenuRelatedUser/${params.row.id}`)
       .then((res) => {
-        // setValues(res.data.data.AssignedUser);
-        // console.log(res.data.data.AssignedUser);
-        res.data.data.AssignedUser.forEach((keyName) => {
-          console.log(keyName);
-        });
+        setValues({ userIds: res.data.data.AssignedUser.toString() });
+      })
+      .catch((error) => {
+        console.error(error);
       });
   };
   const handleChangeAdvance = (name, newValue) => {
@@ -148,17 +151,31 @@ const SubmenuIndex = () => {
     }));
   };
 
+  const handleSelectAll = () => {
+    setValues((prev) => ({
+      ...prev,
+      userIds: userOptions.map((obj) => obj.value),
+    }));
+  };
+  const handleSelectNone = () => {
+    setValues((prev) => ({ ...prev, userIds: [] }));
+  };
+
   const postUserDetails = async () => {
     const temp = {};
     temp.user_ids = values.userIds;
-    console.log(temp);
-    return false;
+
     await axios
       .post(`${ApiUrl}/postUserDetails/${submenuId}`, temp)
-      .then((response) => {
-        if (response.status == 200) {
+      .then((res) => {
+        if (res.status == 200) {
+          setAlertMessage({
+            severity: "success",
+            message: "Assigned Successfully",
+          });
           setAlertOpen(true);
           setOpen(false);
+          navigate("/SubmenuIndex", { replace: true });
         }
       })
       .catch((error) => {
@@ -167,7 +184,7 @@ const SubmenuIndex = () => {
   };
 
   const columns = [
-    { field: "submenu_name", headerName: "Submenu ", flex: 1 },
+    { field: "submenu_name", headerName: "Submenu ", flex: 1, hideable: false },
     { field: "menu_name", headerName: "Menu ", flex: 1 },
     { field: "submenu_url", headerName: "Url", flex: 1 },
     { field: "status", headerName: "Status", flex: 1 },
@@ -277,7 +294,7 @@ const SubmenuIndex = () => {
         open={open}
         maxWidth={1000}
         setOpen={setOpen}
-        title="USER ASSIGNMENT"
+        title={submenuName}
       >
         <Box component="form">
           <Grid
@@ -287,20 +304,18 @@ const SubmenuIndex = () => {
             rowSpacing={4}
             columnSpacing={{ xs: 2, md: 4 }}
           >
-            <Grid item xs={2} md={4}>
-              <CustomMultipleAutocomplete
+            <Grid item xs={12} md={6}>
+              <CheckboxAutocomplete
                 name="userIds"
                 label="Users"
                 value={values.userIds}
                 options={userOptions}
                 handleChangeAdvance={handleChangeAdvance}
+                handleSelectAll={handleSelectAll}
+                handleSelectNone={handleSelectNone}
                 errors={["This field is required"]}
+                checks={[values.userIds.length > 0]}
               />
-              {alertOpen ? (
-                <Alert severity="success">Assigned Successfully</Alert>
-              ) : (
-                ""
-              )}
             </Grid>
             <Grid item xs={12} md={4}>
               <Button

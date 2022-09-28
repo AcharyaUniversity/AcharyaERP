@@ -261,24 +261,19 @@ function LedgerForm() {
                   type="number"
                   label="Priority"
                   name="priority"
-                  value={values.priority ?? ""}
+                  value={values.priority}
                   handleChange={handleChange}
                   fullWidth
-                  setFormValid={setFormValid}
-                  required
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <CustomTextField
                   multiline
                   rows={4}
-                  label="Remarks"
                   name="remarks"
-                  handleChange={handleChange}
                   value={values.remarks}
-                  errors={["This field is required"]}
-                  checks={[values.remarks !== ""]}
-                  fullWidth
+                  label="Remarks"
+                  handleChange={handleChange}
                 />
               </Grid>
 

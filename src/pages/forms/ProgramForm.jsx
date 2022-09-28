@@ -1,73 +1,69 @@
-import { useState, useEffect } from "react";
+import { React, useState, useEffect } from "react";
 import { Box, Grid, Button, CircularProgress } from "@mui/material";
 import FormWrapper from "../../components/FormWrapper";
 import CustomTextField from "../../components/Inputs/CustomTextField";
 import axios from "axios";
 import ApiUrl from "../../services/Api";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useAlert from "../../hooks/useAlert";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
-const initialValues = {
-  jobType: "",
-  jobShortName: "",
-};
-const requiredFields = ["jobType", "jobShortName"];
 
-function JobtypeForm() {
+const initialValues = {
+  programName: "",
+  programShortName: "",
+};
+const requiredFields = ["programName", "programShortName"];
+function ProgramForm() {
   const { id } = useParams();
   const { pathname } = useLocation();
-  const [isNew, setIsNew] = useState(true);
   const setCrumbs = useBreadcrumbs();
   const [values, setValues] = useState(initialValues);
+  const [isNew, setIsNew] = useState(true);
   const [formValid, setFormValid] = useState({});
-  const [jobtypeId, setJobTypeId] = useState(null);
+  const [programId, setProgramId] = useState(null);
   const { setAlertMessage, setAlertOpen } = useAlert();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    if (pathname.toLowerCase() === "/institutemaster/jobtype/new") {
+    if (pathname.toLowerCase() === "/academicmaster/program/new") {
       setIsNew(true);
       requiredFields.forEach((keyName) => {
         setFormValid((prev) => ({ ...prev, [keyName]: false }));
       });
       setCrumbs([
-        { name: "InstituteMaster", link: "/InstituteMaster" },
-        { name: "Jobtype" },
+        { name: "AcademicMaster", link: "/AcademicMaster" },
+        { name: "Program" },
         { name: "Create" },
       ]);
     } else {
       setIsNew(false);
-      getJobtypeData();
+      getProgramData();
       requiredFields.forEach((keyName) => {
-        setFormValid((prev) => ({ ...prev, [keyName]: false }));
+        setFormValid((prev) => ({ ...prev, [keyName]: true }));
       });
     }
   }, []);
 
-  const getJobtypeData = () => {
-    axios
-      .get(`${ApiUrl}/employee/JobType/${id}`)
-      .then((res) => {
-        console.log(res.data.data);
-        setValues({
-          jobType: res.data.data.job_type,
-          jobShortName: res.data.data.job_short_name,
-        });
-        setJobTypeId(res.data.data.job_type_id);
-        setCrumbs([
-          { name: "InstituteMaster", link: "/InstituteMaster" },
-          { name: "Jobtype" },
-          { name: "Update" },
-          { name: res.data.data.job_type },
-        ]);
-      })
-      .catch((error) => {
-        console.error(error);
+  const getProgramData = () => {
+    axios.get(`${ApiUrl}/academic/Program/${id}`).then((res) => {
+      setValues({
+        programName: res.data.data.program_name,
+        programShortName: res.data.data.program_short_name,
       });
+      setProgramId(res.data.data.program_id);
+      setCrumbs([
+        { name: "AcademicMaster", link: "/AcademicMaster" },
+        { name: "Program" },
+        { name: "Update" },
+        { name: res.data.data.program_name },
+      ]);
+    });
   };
 
-  const [loading, setLoading] = useState(false);
   const handleChange = (e) => {
-    if (e.target.name === "jobShortName") {
+    console.log(values.programName.trim().split(/ +/).join(" "));
+    if (e.target.name == "programShortName") {
       setValues((prev) => ({
         ...prev,
         [e.target.name]: e.target.value.toUpperCase(),
@@ -84,67 +80,60 @@ function JobtypeForm() {
     if (Object.values(formValid).includes(false)) {
       setAlertMessage({
         severity: "error",
-        message: "Please fill all fields",
+        message: "Please fill required fields",
       });
-      setAlertOpen(true);
       console.log("failed");
+      setAlertOpen(true);
     } else {
+      setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.job_type = values.jobType;
-      temp.job_short_name = values.jobShortName;
-
+      temp.program_name = values.programName;
+      temp.program_short_name = values.programShortName;
       await axios
-        .post(`${ApiUrl}/employee/JobType`, temp)
-        .then((res) => {
-          if (res.data.status === 200 || res.data.status === 201) {
-            setAlertMessage({
-              severity: "success",
-              message: "Jobtype Created",
-            });
-            setAlertOpen(true);
-            navigate("/InstituteMaster", { replace: true });
-          } else {
-            setAlertMessage({
-              severity: "error",
-              message: res.data ? res.data.message : "Error",
-            });
-            setAlertOpen(true);
-          }
+        .post(`${ApiUrl}/academic/Program`, temp)
+        .then((response) => {
+          setAlertMessage({
+            severity: "success",
+            message: "Form Submitted Successfully",
+          });
+          setAlertOpen(true);
+          navigate("/AcademicMaster", { replace: true });
         })
-        .catch((err) => {
+        .catch((error) => {
           setLoading(false);
           setAlertMessage({
             severity: "error",
-            message: err.response ? err.response.data.message : "Error",
+            message: error.response ? error.response.data.message : "Error",
           });
           setAlertOpen(true);
         });
     }
   };
+
   const handleUpdate = async (e) => {
     if (Object.values(formValid).includes(false)) {
       setAlertMessage({
         severity: "error",
-        message: "Please fill all fields",
+        message: "Please fill required fields",
       });
-      setAlertOpen(true);
       console.log("failed");
+      setAlertOpen(true);
     } else {
       const temp = {};
       temp.active = true;
-      temp.job_type_id = jobtypeId;
-      temp.job_type = values.jobType;
-      temp.job_short_name = values.jobShortName;
+      temp.program_id = programId;
+      temp.program_name = values.programName;
+      temp.program_short_name = values.programShortName;
       await axios
-        .put(`${ApiUrl}/employee/JobType/${id}`, temp)
+        .put(`${ApiUrl}/academic/Program/${id}`, temp)
         .then((response) => {
-          if (response.status === 200 || response.status === 201) {
+          if (response.status === 200) {
             setAlertMessage({
               severity: "success",
-              message: "Jobtype Updated",
+              message: "Form Updated Successfully",
             });
-            navigate("/InstituteMaster", { replace: true });
+            navigate("/AcademicMaster", { replace: true });
           } else {
             setAlertMessage({
               severity: "error",
@@ -154,15 +143,15 @@ function JobtypeForm() {
           setAlertOpen(true);
         })
         .catch((error) => {
-          console.log(error.response.data.message);
+          setLoading(false);
           setAlertMessage({
             severity: "error",
-            message: error.response ? error.response.data.message : "Error",
+            message: error.response.data.message,
           });
-          setAlertOpen(true);
         });
     }
   };
+
   return (
     <>
       <Box component="form" overflow="hidden" p={1}>
@@ -171,21 +160,26 @@ function JobtypeForm() {
             container
             alignItems="center"
             justifyContent="flex-start"
-            rowSpacing={4}
+            rowSpacing={2}
             columnSpacing={{ xs: 2, md: 4 }}
           >
             <>
               <Grid item xs={12} md={6}>
                 <CustomTextField
-                  name="jobType"
-                  label="Job Type"
-                  value={values.jobType ?? ""}
+                  name="programName"
+                  label="Program"
+                  value={values.programName}
                   handleChange={handleChange}
                   fullWidth
-                  errors={["This field required", "Enter Only Characters"]}
+                  errors={[
+                    "This field required",
+                    "Enter Only Characters",
+                    "Empty spaces not allowed",
+                  ]}
                   checks={[
-                    values.jobType !== "",
-                    /^[A-Za-z ]+$/.test(values.jobType),
+                    values.programName !== "",
+                    /^[A-Za-z ]+$/.test(values.programName),
+                    values.programName.trim().split(/ +/).join(" "),
                   ]}
                   setFormValid={setFormValid}
                   required
@@ -193,9 +187,9 @@ function JobtypeForm() {
               </Grid>
               <Grid item xs={12} md={6}>
                 <CustomTextField
-                  name="jobShortName"
+                  name="programShortName"
                   label="Short Name"
-                  value={values.jobShortName ?? ""}
+                  value={values.programShortName}
                   handleChange={handleChange}
                   inputProps={{
                     minLength: 3,
@@ -207,8 +201,8 @@ function JobtypeForm() {
                     "Enter characters and its length should be three",
                   ]}
                   checks={[
-                    values.jobShortName !== "",
-                    /^[A-Za-z ]{3}$/.test(values.jobShortName),
+                    values.programShortName !== "",
+                    /^[A-Za-z ]{3}$/.test(values.programShortName),
                   ]}
                   setFormValid={setFormValid}
                   required
@@ -249,4 +243,4 @@ function JobtypeForm() {
     </>
   );
 }
-export default JobtypeForm;
+export default ProgramForm;

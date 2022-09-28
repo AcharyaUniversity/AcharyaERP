@@ -1,73 +1,79 @@
-import { useState, useEffect } from "react";
+import { React, useState, useEffect } from "react";
 import { Box, Grid, Button, CircularProgress } from "@mui/material";
-import FormWrapper from "../../components/FormWrapper";
 import CustomTextField from "../../components/Inputs/CustomTextField";
 import axios from "axios";
 import ApiUrl from "../../services/Api";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import CustomRadioButtons from "../../components/Inputs/CustomRadioButtons";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useAlert from "../../hooks/useAlert";
+import FormWrapper from "../../components/FormWrapper";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 const initialValues = {
-  jobType: "",
-  jobShortName: "",
+  deptName: "",
+  deptShortName: "",
+  webStatus: "",
+  commonService: "",
 };
-const requiredFields = ["jobType", "jobShortName"];
+const requiredFields = [
+  "deptName",
+  "deptShortName",
+  "webStatus",
+  "commonService",
+];
 
-function JobtypeForm() {
+function DepartmentForm() {
   const { id } = useParams();
   const { pathname } = useLocation();
-  const [isNew, setIsNew] = useState(true);
   const setCrumbs = useBreadcrumbs();
+  const [isNew, setIsNew] = useState(true);
   const [values, setValues] = useState(initialValues);
+  const [deptId, setDeptId] = useState(null);
   const [formValid, setFormValid] = useState({});
-  const [jobtypeId, setJobTypeId] = useState(null);
   const { setAlertMessage, setAlertOpen } = useAlert();
+
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    if (pathname.toLowerCase() === "/institutemaster/jobtype/new") {
+    if (pathname.toLowerCase() === "/academicmaster/department/new") {
       setIsNew(true);
-      requiredFields.forEach((keyName) => {
-        setFormValid((prev) => ({ ...prev, [keyName]: false }));
-      });
+      requiredFields.forEach((keyName) =>
+        setFormValid((prev) => ({ ...prev, [keyName]: false }))
+      );
       setCrumbs([
-        { name: "InstituteMaster", link: "/InstituteMaster" },
-        { name: "Jobtype" },
+        { name: "AcademicMaster", link: "/AcademicMaster" },
+        { name: "Department" },
         { name: "Create" },
       ]);
     } else {
       setIsNew(false);
-      getJobtypeData();
-      requiredFields.forEach((keyName) => {
-        setFormValid((prev) => ({ ...prev, [keyName]: false }));
-      });
+      getDepartmentData();
+      requiredFields.forEach((keyName) =>
+        setFormValid((prev) => ({ ...prev, [keyName]: true }))
+      );
     }
-  }, []);
+  }, [pathname]);
 
-  const getJobtypeData = () => {
-    axios
-      .get(`${ApiUrl}/employee/JobType/${id}`)
-      .then((res) => {
-        console.log(res.data.data);
-        setValues({
-          jobType: res.data.data.job_type,
-          jobShortName: res.data.data.job_short_name,
-        });
-        setJobTypeId(res.data.data.job_type_id);
-        setCrumbs([
-          { name: "InstituteMaster", link: "/InstituteMaster" },
-          { name: "Jobtype" },
-          { name: "Update" },
-          { name: res.data.data.job_type },
-        ]);
-      })
-      .catch((error) => {
-        console.error(error);
+  const getDepartmentData = () => {
+    axios.get(`${ApiUrl}/dept/${id}`).then((res) => {
+      setValues({
+        deptName: res.data.data.dept_name,
+        deptShortName: res.data.data.dept_name_short,
+        webStatus: res.data.data.web_status,
+        commonService: res.data.data.common_service,
       });
+      setDeptId(res.data.data.dept_id);
+      setCrumbs([
+        { name: "AcademicMaster", link: "/AcademicMaster" },
+        { name: "Department" },
+        { name: "Update" },
+        { name: res.data.data.dept_name },
+      ]);
+    });
   };
 
-  const [loading, setLoading] = useState(false);
   const handleChange = (e) => {
-    if (e.target.name === "jobShortName") {
+    if (e.target.name == "deptShortName") {
       setValues((prev) => ({
         ...prev,
         [e.target.name]: e.target.value.toUpperCase(),
@@ -86,65 +92,64 @@ function JobtypeForm() {
         severity: "error",
         message: "Please fill all fields",
       });
-      setAlertOpen(true);
       console.log("failed");
+      setAlertOpen(true);
     } else {
+      setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.job_type = values.jobType;
-      temp.job_short_name = values.jobShortName;
-
+      temp.dept_name = values.deptName;
+      temp.dept_name_short = values.deptShortName;
+      temp.web_status = values.webStatus;
+      temp.common_service = values.commonService;
       await axios
-        .post(`${ApiUrl}/employee/JobType`, temp)
-        .then((res) => {
-          if (res.data.status === 200 || res.data.status === 201) {
-            setAlertMessage({
-              severity: "success",
-              message: "Jobtype Created",
-            });
-            setAlertOpen(true);
-            navigate("/InstituteMaster", { replace: true });
-          } else {
-            setAlertMessage({
-              severity: "error",
-              message: res.data ? res.data.message : "Error",
-            });
-            setAlertOpen(true);
-          }
+        .post(`${ApiUrl}/dept`, temp)
+        .then((response) => {
+          console.log(response);
+          setAlertMessage({
+            severity: "success",
+            message: "Form Submitted Successfully",
+          });
+          setAlertOpen(true);
+          navigate("/AcademicMaster", { replace: true });
         })
-        .catch((err) => {
+        .catch((error) => {
           setLoading(false);
           setAlertMessage({
             severity: "error",
-            message: err.response ? err.response.data.message : "Error",
+            message: error.response ? error.response.data.message : "Error",
           });
           setAlertOpen(true);
         });
     }
   };
+
   const handleUpdate = async (e) => {
     if (Object.values(formValid).includes(false)) {
       setAlertMessage({
         severity: "error",
         message: "Please fill all fields",
       });
-      setAlertOpen(true);
       console.log("failed");
+      setAlertOpen(true);
     } else {
+      setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.job_type_id = jobtypeId;
-      temp.job_type = values.jobType;
-      temp.job_short_name = values.jobShortName;
+      temp.dept_id = deptId;
+      temp.dept_name = values.deptName;
+      temp.dept_name_short = values.deptShortName;
+      temp.web_status = values.webStatus;
+      temp.common_service = values.commonService;
       await axios
-        .put(`${ApiUrl}/employee/JobType/${id}`, temp)
+        .put(`${ApiUrl}/dept/${id}`, temp)
         .then((response) => {
           if (response.status === 200 || response.status === 201) {
             setAlertMessage({
               severity: "success",
-              message: "Jobtype Updated",
+              message: "Form Updated Successfully",
             });
-            navigate("/InstituteMaster", { replace: true });
+            navigate("/AcademicMaster", { replace: true });
           } else {
             setAlertMessage({
               severity: "error",
@@ -154,7 +159,7 @@ function JobtypeForm() {
           setAlertOpen(true);
         })
         .catch((error) => {
-          console.log(error.response.data.message);
+          setLoading(false);
           setAlertMessage({
             severity: "error",
             message: error.response ? error.response.data.message : "Error",
@@ -171,21 +176,21 @@ function JobtypeForm() {
             container
             alignItems="center"
             justifyContent="flex-start"
-            rowSpacing={4}
+            rowSpacing={2}
             columnSpacing={{ xs: 2, md: 4 }}
           >
             <>
               <Grid item xs={12} md={6}>
                 <CustomTextField
-                  name="jobType"
-                  label="Job Type"
-                  value={values.jobType ?? ""}
+                  name="deptName"
+                  label="Department"
+                  value={values.deptName}
                   handleChange={handleChange}
                   fullWidth
                   errors={["This field required", "Enter Only Characters"]}
                   checks={[
-                    values.jobType !== "",
-                    /^[A-Za-z ]+$/.test(values.jobType),
+                    values.deptName !== "",
+                    /^[A-Za-z ]+$/.test(values.deptName),
                   ]}
                   setFormValid={setFormValid}
                   required
@@ -193,11 +198,12 @@ function JobtypeForm() {
               </Grid>
               <Grid item xs={12} md={6}>
                 <CustomTextField
-                  name="jobShortName"
+                  name="deptShortName"
                   label="Short Name"
-                  value={values.jobShortName ?? ""}
+                  value={values.deptShortName}
                   handleChange={handleChange}
                   inputProps={{
+                    style: { textTransform: "uppercase" },
                     minLength: 3,
                     maxLength: 3,
                   }}
@@ -207,9 +213,53 @@ function JobtypeForm() {
                     "Enter characters and its length should be three",
                   ]}
                   checks={[
-                    values.jobShortName !== "",
-                    /^[A-Za-z ]{3}$/.test(values.jobShortName),
+                    values.deptShortName !== "",
+                    /^[A-Za-z ]{3}$/.test(values.deptShortName),
                   ]}
+                  setFormValid={setFormValid}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <CustomRadioButtons
+                  name="webStatus"
+                  label="Web Status "
+                  value={values.webStatus}
+                  items={[
+                    {
+                      value: "Yes",
+                      label: "Yes",
+                    },
+                    {
+                      value: "No",
+                      label: "No",
+                    },
+                  ]}
+                  handleChange={handleChange}
+                  errors={["This field is required"]}
+                  checks={[values.webStatus !== ""]}
+                  setFormValid={setFormValid}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <CustomRadioButtons
+                  name="commonService"
+                  label="Common Service"
+                  value={values.commonService}
+                  items={[
+                    {
+                      value: true,
+                      label: "Yes",
+                    },
+                    {
+                      value: false,
+                      label: "No",
+                    },
+                  ]}
+                  handleChange={handleChange}
+                  errors={["This field is required"]}
+                  checks={[values.commonService !== ""]}
                   setFormValid={setFormValid}
                   required
                 />
@@ -249,4 +299,4 @@ function JobtypeForm() {
     </>
   );
 }
-export default JobtypeForm;
+export default DepartmentForm;

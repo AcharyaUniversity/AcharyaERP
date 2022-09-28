@@ -213,7 +213,7 @@ function ModuleForm() {
               ]}
               checks={[
                 values.moduleShortName !== "",
-                /^[A-Za-z ]{3,3}$/.test(values.moduleShortName),
+                /^[A-Za-z ]{3}$/.test(values.moduleShortName),
               ]}
               setFormValid={setFormValid}
               required

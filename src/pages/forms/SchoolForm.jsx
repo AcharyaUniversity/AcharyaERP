@@ -345,7 +345,7 @@ function SchoolForm() {
               ]}
               checks={[
                 values.shortName !== "",
-                /^[A-Za-z ]{3,3}$/.test(values.shortName),
+                /^[A-Za-z ]{3}$/.test(values.shortName),
               ]}
               setFormValid={setFormValid}
               required
