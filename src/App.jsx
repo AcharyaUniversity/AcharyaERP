@@ -30,6 +30,21 @@ import SchoolForm from "./pages/forms/SchoolForm";
 import ModuleForm from "./pages/forms/ModuleForm";
 import MenuForm from "./pages/forms/MenuForm";
 
+import TranscriptMaster from "./pages/masters/TranscriptMaster";
+import TranscriptForm from "./pages/forms/TranscriptForm";
+import TranscriptAssignmentForm from "./pages/forms/TranscriptAssignmentForm";
+import TranscriptProgramIndex from "./containers/indeces/TranscriptProgramIndex";
+
+import InventoryMaster from "./pages/masters/InventoryMaster";
+import StoreForm from "./pages/forms/StoreForm";
+import MeasureForm from "./pages/forms/MeasureForm";
+
+import CandidateWalkinMaster from "./pages/masters/CandidateWalkinMaster";
+import ApplicationForm from "./pages/forms/ApplicationForm";
+
+import DesignationMaster from "./pages/masters/DesignationMaster";
+import DesignationForm from "./pages/forms/DesignationForm";
+
 function App() {
   return (
     <ThemeContextProvider>
@@ -138,6 +153,103 @@ function App() {
                   exact
                   path="/SubmenuUpdate/:id"
                   element={<SubmenuUpdate />}
+                />
+
+                <Route
+                  exact
+                  path="/NavigationMaster/Module/New"
+                  element={<ModuleForm />}
+                />
+                <Route
+                  exact
+                  path="/NavigationMaster/Module/Update/:id"
+                  element={<ModuleForm />}
+                />
+
+                {/* Transcript Master */}
+
+                <Route
+                  exact
+                  path="/TranscriptMaster"
+                  element={<TranscriptMaster />}
+                />
+                <Route
+                  exact
+                  path="/TranscriptMaster/Transcript/New"
+                  element={<TranscriptForm />}
+                />
+                <Route
+                  exact
+                  path="/TranscriptMaster/Transcript/Update/:id"
+                  element={<TranscriptForm />}
+                />
+                <Route
+                  exact
+                  path="/Transcript Assignment "
+                  element={<TranscriptProgramIndex />}
+                />
+                <Route
+                  exact
+                  path="/TranscriptMaster/TranscriptAssignment/Assign"
+                  element={<TranscriptAssignmentForm />}
+                />
+
+                {/* Inventory Master */}
+
+                <Route
+                  exact
+                  path="/InventoryMaster"
+                  element={<InventoryMaster />}
+                />
+                <Route
+                  exact
+                  path="/InventoryMaster/Store/New"
+                  element={<StoreForm />}
+                />
+                <Route
+                  exact
+                  path="/InventoryMaster/Store/Update/:id"
+                  element={<StoreForm />}
+                />
+                <Route
+                  exact
+                  path="/InventoryMaster/Measure/New"
+                  element={<MeasureForm />}
+                />
+                <Route
+                  exact
+                  path="/InventoryMaster/Measure/Update/:id"
+                  element={<MeasureForm />}
+                />
+
+                {/* Candidate Walkin Master */}
+
+                <Route
+                  exact
+                  path="/CandidateWalkinMaster"
+                  element={<CandidateWalkinMaster />}
+                />
+                <Route
+                  exact
+                  path="/CandidateWalkinMaster/Candidate/New"
+                  element={<ApplicationForm />}
+                />
+
+                {/*Designation Master */}
+                <Route
+                  exact
+                  path="/DesignationMaster"
+                  element={<DesignationMaster />}
+                />
+                <Route
+                  exact
+                  path="/DesignationMaster/Designation/New"
+                  element={<DesignationForm />}
+                />
+                <Route
+                  exact
+                  path="/DesignationMaster/Designation/Update/:id"
+                  element={<DesignationForm />}
                 />
               </>
 
