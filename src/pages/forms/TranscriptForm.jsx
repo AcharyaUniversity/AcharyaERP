@@ -21,11 +21,6 @@ function TranscriptForm() {
   const [values, setValues] = useState(initialValues);
   const [formValid, setFormValid] = useState({});
   const [transcriptId, setTranscriptId] = useState(null);
-  const [modalContent, setModalContent] = useState({
-    title: "",
-    message: "",
-    buttons: [],
-  });
 
   const [loading, setLoading] = useState(false);
   const { setAlertMessage, setAlertOpen } = useAlert();

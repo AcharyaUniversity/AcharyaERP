@@ -21,11 +21,6 @@ function DesignationForm() {
   const [values, setValues] = useState(initValues);
   const [formValid, setFormValid] = useState({});
   const [DesignationId, setDesignationId] = useState(null);
-  const [modalContent, setModalContent] = useState({
-    title: "",
-    message: "",
-    buttons: [],
-  });
 
   const [loading, setLoading] = useState(false);
   const { setAlertMessage, setAlertOpen } = useAlert();

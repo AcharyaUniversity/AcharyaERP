@@ -19,11 +19,6 @@ function MeasureForm() {
   const [values, setValues] = useState(initValues);
   const [formValid, setFormValid] = useState({});
   const [measureId, setMeasureId] = useState(null);
-  const [modalContent, setModalContent] = useState({
-    title: "",
-    message: "",
-    buttons: [],
-  });
 
   const [loading, setLoading] = useState(false);
   const { setAlertMessage, setAlertOpen } = useAlert();
