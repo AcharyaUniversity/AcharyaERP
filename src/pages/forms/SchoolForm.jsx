@@ -219,19 +219,18 @@ function SchoolForm() {
         .then((res) => {
           setLoading(false);
           if (res.data.status === 200 || res.data.status === 201) {
+            navigate("/InstituteMaster", { replace: true });
             setAlertMessage({
               severity: "success",
               message: "Form submitted successfully!",
             });
-            setAlertOpen(true);
-            navigate("/InstituteMaster", { replace: true });
           } else {
             setAlertMessage({
               severity: "error",
               message: res.data ? res.data.message : "Error",
             });
-            setAlertOpen(true);
           }
+          setAlertOpen(true);
         })
         .catch((err) => {
           setLoading(false);
@@ -269,20 +268,21 @@ function SchoolForm() {
         .put(`${ApiUrl}/institute/school/${id}`, temp)
         .then((res) => {
           setLoading(false);
-          if (res.data.status === 200) {
+
+          if (res.data.status === 200 || res.data.status === 201) {
+            navigate("/InstituteMaster", { replace: true });
+
             setAlertMessage({
               severity: "success",
               message: "Form submitted successfully!",
             });
-            setAlertOpen(true);
-            navigate("/InstituteMaster", { replace: true });
           } else {
             setAlertMessage({
               severity: "error",
               message: res.data ? res.data.message : "Error",
             });
-            setAlertOpen(true);
           }
+          setAlertOpen(true);
         })
         .catch((err) => {
           setLoading(false);
@@ -308,6 +308,7 @@ function SchoolForm() {
         <Grid
           container
           alignItems="center"
+          justifyContent="center"
           rowSpacing={4}
           columnSpacing={{ xs: 2, md: 4 }}
         >
@@ -439,8 +440,8 @@ function SchoolForm() {
                 },
               ]}
               handleChange={handleChange}
-              errors={["This field is required"]}
-              checks={[values.webStatus !== ""]}
+              setFormValid={setFormValid}
+              required
             />
           </Grid>
           <Grid item xs={12}>

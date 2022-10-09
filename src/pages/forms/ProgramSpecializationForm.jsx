@@ -264,14 +264,15 @@ function ProgramSpecializationForm() {
       await axios
         .put(`${ApiUrl}/academic/ProgramSpecilization/${id}`, temp)
         .then((response) => {
-          setLoading(true);
           if (response.status === 200) {
+            setLoading(true);
             setAlertMessage({
               severity: "success",
               message: "Form Updated Successfully",
             });
             navigate("/AcademicMaster", { replace: true });
           } else {
+            setLoading(false);
             setAlertMessage({
               severity: "error",
               message: response.data.message,

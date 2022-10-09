@@ -9,16 +9,19 @@ import CustomAutocomplete from "../../components/Inputs/CustomAutocomplete";
 import CustomMultipleAutocomplete from "../../components/Inputs/CustomMultipleAutocomplete";
 import CheckboxAutocomplete from "../../components/Inputs/CheckboxAutocomplete";
 import CustomDatePicker from "../../components/Inputs/CustomDatePicker";
+import CustomTimePicker from "../../components/Inputs/CustomTimePicker";
+import CustomDateTimePicker from "../../components/Inputs/CustomDateTimePicker";
 import CustomColorInput from "../../components/Inputs/CustomColorInput";
 import CustomFileInput from "../../components/Inputs/CustomFileInput";
 
 import FormWrapper from "../../components/FormWrapper";
 import ModalWrapper from "../../components/ModalWrapper";
 import InfoContainer from "./InfoContainer";
-import { convertDateToString } from "../../utils/DateUtils";
+import { convertDateToString } from "../../utils/DateTimeUtils";
 import useAlert from "../../hooks/useAlert";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 
+import dayjs from "dayjs";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -39,6 +42,10 @@ const initValues = {
   cats: [], // optional field
   joinDate: null,
   completeDate: null, // optional field
+  startTime: null,
+  endTime: null, // optional field
+  enterDateTime: null,
+  leaveDateTime: null, // optional field
   notes: "",
   comments: "", // optional field
   primaryColor: "",
@@ -58,6 +65,7 @@ const formValidInit = {
   country: false,
   people: false,
   joinDate: false,
+  startTime: false,
   notes: false,
   primaryColor: false,
   resume: false,
@@ -105,7 +113,7 @@ function FormExample() {
     }));
   };
 
-  // for autocomplete and date picker
+  // for autocomplete and date/time pickers
   const handleChangeAdvance = (name, newValue) => {
     setValues((prev) => ({
       ...prev,
@@ -113,9 +121,20 @@ function FormExample() {
     }));
   };
 
+  // these are for Checkbox autocomplete component
+  const handleSelectAll = (name, options) => {
+    console.log(name, options);
+    setValues((prev) => ({
+      ...prev,
+      [name]: options.map((obj) => obj.value),
+    }));
+  };
+  const handleSelectNone = (name) => {
+    setValues((prev) => ({ ...prev, [name]: [] }));
+  };
+
   // for file adding and removing
   const handleFileDrop = (name, newFile) => {
-    // const newFile = e.target.files[0];
     if (newFile)
       setValues((prev) => ({
         ...prev,
@@ -174,16 +193,6 @@ function FormExample() {
     setFormValid(formValidInit);
   };
 
-  const handleSelectAll = () => {
-    setValues((prev) => ({
-      ...prev,
-      toppings: toppingOptions.map((obj) => obj.value),
-    }));
-  };
-  const handleSelectNone = () => {
-    setValues((prev) => ({ ...prev, toppings: [] }));
-  };
-
   const handleSubmit = async () => {
     if (Object.values(formValid).includes(false)) {
       console.log("failed");
@@ -199,13 +208,21 @@ function FormExample() {
         .post(``)
         .then((res) => {
           setLoading(false);
-          setAlertMessage({
-            severity: "success",
-            message: res.data.message,
-          });
+          if (res.status === 200 || res.status === 201) {
+            setAlertMessage({
+              severity: "success",
+              message: res.data.message,
+            });
+            navigate("/", { replace: true });
+          } else {
+            setAlertMessage({
+              severity: "error",
+              message: res.response
+                ? res.response.data.message
+                : "Error submitting",
+            });
+          }
           setAlertOpen(true);
-
-          navigate("/", { replace: true });
         })
         .catch((err) => {
           setLoading(false);
@@ -216,12 +233,11 @@ function FormExample() {
               : "Error submitting",
           });
           setAlertOpen(true);
-          console.log(err);
         });
     }
   };
 
-  // useEffect(() => console.log(values.toppings), [values]);
+  // useEffect(() => console.log(values.joinDate), [values]);
   // useEffect(() => console.log(formValid.toppings), [formValid]);
 
   return (
@@ -247,11 +263,11 @@ function FormExample() {
         <Grid
           container
           alignItems="center"
-          justifyContent="flex-start"
+          justifyContent="center"
           rowSpacing={4}
           columnSpacing={{ xs: 2, md: 4 }}
         >
-          {/* first row */}
+          {/* 1st row */}
           <>
             <Grid item xs={12} md={4}>
               <CustomTextField
@@ -313,7 +329,7 @@ function FormExample() {
             </Grid>
           </>
 
-          {/* second row */}
+          {/* 2nd row */}
           <>
             <Grid item xs={12} md={4}>
               <CustomTextField
@@ -540,29 +556,29 @@ function FormExample() {
                 label="Date of joining"
                 value={values.joinDate}
                 handleChangeAdvance={handleChangeAdvance}
-                maxDate={values.completeDate ? values.completeDate : new Date()}
                 errors={
                   values.completeDate
                     ? [
-                        "This field is required",
+                        `This field is required`,
                         `Must be before today`,
                         `Must be before ${convertDateToString(
-                          values.completeDate
+                          values.completeDate.$d
                         )}`,
                       ]
-                    : ["This field is required", `Must be before today`]
+                    : [`This field is required`, `Must be before today`]
                 }
                 checks={
                   values.completeDate
                     ? [
-                        values.joinDate !== null,
-                        values.joinDate < new Date(),
+                        values.joinDate,
+                        values.joinDate < dayjs(),
                         values.joinDate < values.completeDate,
                       ]
-                    : [values.joinDate !== null, values.joinDate < new Date()]
+                    : [values.joinDate, values.joinDate < dayjs()]
                 }
                 setFormValid={setFormValid}
                 required
+                disableFuture
               />
             </Grid>
             <Grid item xs={12} md={4}>
@@ -571,13 +587,92 @@ function FormExample() {
                 label="Date of completion"
                 value={values.completeDate}
                 handleChangeAdvance={handleChangeAdvance}
-                minDate={values.joinDate ? values.joinDate : null}
-                maxDate={new Date()}
+                errors={
+                  values.joinDate
+                    ? [
+                        `Must be before today`,
+                        `Must be after ${convertDateToString(
+                          values.joinDate.$d
+                        )}`,
+                      ]
+                    : [`Must be before today`]
+                }
+                checks={
+                  values.joinDate
+                    ? [
+                        values.completeDate < dayjs(),
+                        values.completeDate > values.joinDate,
+                      ]
+                    : [values.joinDate < dayjs()]
+                }
+                minDate={values.joinDate}
+                disabled={!values.joinDate}
+                disableFuture
               />
             </Grid>
           </>
 
           {/* 9th row */}
+          <>
+            <Grid item xs={12} md={4}>
+              Time picker
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <CustomTimePicker
+                name="startTime"
+                label="Start time"
+                value={values.startTime}
+                handleChangeAdvance={handleChangeAdvance}
+                seconds
+                errors={["This field is required"]}
+                checks={[values.startTime]}
+                setFormValid={setFormValid}
+                required
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <CustomTimePicker
+                name="endTime"
+                label="End time"
+                value={values.endTime}
+                handleChangeAdvance={handleChangeAdvance}
+                minTime={values.startTime}
+                disabled={!values.startTime}
+              />
+            </Grid>
+          </>
+
+          {/* 10th row */}
+          <>
+            <Grid item xs={12} md={4}>
+              Date and Time picker
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <CustomDateTimePicker
+                name="enterDateTime"
+                label="Entry date and time"
+                value={values.enterDateTime}
+                handleChangeAdvance={handleChangeAdvance}
+                seconds
+                errors={["This field is required"]}
+                checks={[values.enterDateTime]}
+                setFormValid={setFormValid}
+                required
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <CustomDateTimePicker
+                name="leaveDateTime"
+                label="Leaving date and time"
+                value={values.leaveDateTime}
+                handleChangeAdvance={handleChangeAdvance}
+                minDateTime={values.enterDateTime}
+                disabled={!values.enterDateTime}
+              />
+            </Grid>
+          </>
+
+          {/* 11th row */}
           <>
             {/* Just use CustomTextField with multiline and rows props */}
             <Grid item xs={12} md={4}>
@@ -609,8 +704,7 @@ function FormExample() {
             </Grid>
           </>
 
-          {/* 10th row */}
-
+          {/* 12th row */}
           <>
             <Grid item xs={12} md={4}>
               Color input
@@ -635,7 +729,7 @@ function FormExample() {
             </Grid>
           </>
 
-          {/* 11th row */}
+          {/* 13th row */}
           <>
             <Grid item xs={12} md={4}>
               File input

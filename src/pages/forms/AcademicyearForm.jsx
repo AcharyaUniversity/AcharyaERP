@@ -60,14 +60,14 @@ function AcademicyearForm() {
   };
 
   const handleChange = (e) => {
-    let Firstyearone = e.target.value;
-    let Secondyearone = (parseInt(e.target.value) + 1).toString();
-    let concat = Firstyearone + "-" + Secondyearone;
-    setValues((prev) => ({
+    const Firstyearone = e.target.value;
+    const Secondyearone = (parseInt(e.target.value) + 1).toString();
+    const concat = Firstyearone + "-" + Secondyearone;
+    setValues({
       acYear: Firstyearone,
       acYearCode: Secondyearone,
       currentYear: concat,
-    }));
+    });
   };
   const handleCreate = async (e) => {
     const temp = {};

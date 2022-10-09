@@ -104,14 +104,22 @@ function DepartmentForm() {
       temp.common_service = values.commonService;
       await axios
         .post(`${ApiUrl}/dept`, temp)
-        .then((response) => {
-          console.log(response);
-          setAlertMessage({
-            severity: "success",
-            message: "Form Submitted Successfully",
-          });
+        .then((res) => {
+          setLoading(false);
+          if (res.status === 200 || res.status === 201) {
+            navigate("/AcademicMaster", { replace: true });
+            setAlertMessage({
+              severity: "success",
+              message: "Form Submitted Successfully",
+            });
+          } else {
+            setAlertMessage({
+              severity: "error",
+              message: res.data.message,
+            });
+          }
+
           setAlertOpen(true);
-          navigate("/AcademicMaster", { replace: true });
         })
         .catch((error) => {
           setLoading(false);
@@ -144,6 +152,7 @@ function DepartmentForm() {
       await axios
         .put(`${ApiUrl}/dept/${id}`, temp)
         .then((response) => {
+          setLoading(false);
           if (response.status === 200 || response.status === 201) {
             setAlertMessage({
               severity: "success",

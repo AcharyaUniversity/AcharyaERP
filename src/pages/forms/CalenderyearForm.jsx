@@ -15,7 +15,7 @@ const initialValues = {
   remarks: "",
 };
 
-const requiredFields = ["financialYear", "fromDate"];
+const requiredFields = ["calenderYear", "fromDate", "toDate"];
 
 function CalenderyearForm() {
   const { id } = useParams();
@@ -100,12 +100,20 @@ function CalenderyearForm() {
       await axios
         .post(`${ApiUrl}/CalenderYear`, temp)
         .then((res) => {
-          setAlertMessage({
-            severity: "success",
-            message: "Form Submitted Successfully",
-          });
-          setAlertOpen(true);
           navigate("/AcademicCalendars", { replace: true });
+          if (res.status === 200 || res.status === 201) {
+            setAlertMessage({
+              severity: "success",
+              message: "Form Submitted Successfully",
+            });
+          } else {
+            setAlertMessage({
+              severity: "error",
+              message: res.data ? res.data.message : "An error occured",
+            });
+          }
+
+          setAlertOpen(true);
         })
         .catch((error) => {
           setLoading(false);
@@ -137,12 +145,20 @@ function CalenderyearForm() {
       await axios
         .put(`${ApiUrl}/CalenderYear/${id}`, temp)
         .then((res) => {
-          setAlertMessage({
-            severity: "success",
-            message: "Form Submitted Successfully",
-          });
+          setLoading(false);
+          if (res.status === 200 || res.status === 201) {
+            navigate("/AcademicCalendars", { replace: true });
+            setAlertMessage({
+              severity: "success",
+              message: "Form Submitted Successfully",
+            });
+          } else {
+            setAlertMessage({
+              severity: "error",
+              message: res.data ? res.data.message : "An error occured",
+            });
+          }
           setAlertOpen(true);
-          navigate("/AcademicCalendars", { replace: true });
         })
         .catch((error) => {
           setLoading(false);

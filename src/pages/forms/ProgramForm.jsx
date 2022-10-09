@@ -62,7 +62,6 @@ function ProgramForm() {
   };
 
   const handleChange = (e) => {
-    console.log(values.programName.trim().split(/ +/).join(" "));
     if (e.target.name == "programShortName") {
       setValues((prev) => ({
         ...prev,

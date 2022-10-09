@@ -23,7 +23,7 @@ function DepartmentIndex() {
         `${ApiUrl}/fetchAllDeptDetail?page=${0}&page_size=${100}&sort=created_date`
       )
       .then((res) => {
-        
+        console.log(res);
         setRows(res.data.data.Paginated_data.content);
       });
   };
@@ -73,7 +73,12 @@ function DepartmentIndex() {
     { field: "dept_name", headerName: "Department", flex: 1 },
     { field: "dept_name_short", headerName: "Short Name", flex: 1 },
     { field: "web_status", headerName: "Web Status", flex: 1 },
-    { field: "common_service", headerName: "Service Tag", flex: 1 },
+    {
+      field: "common_service",
+      headerName: "Service Tag",
+      valueGetter: (params) => (params.row.common_service ? "Yes" : "No"),
+      flex: 1,
+    },
     { field: "created_username", headerName: "Created By", flex: 1 },
     {
       field: "created_date",

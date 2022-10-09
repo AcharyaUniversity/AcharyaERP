@@ -33,7 +33,6 @@ function DepartmentAssignmentForm() {
   const [deptData, setDeptData] = useState([]);
 
   useEffect(() => {
-    getSchool();
     getDept();
     if (pathname.toLowerCase() === "/academicmaster/departmentassignment/new") {
       setIsNew(true);
@@ -76,22 +75,6 @@ function DepartmentAssignmentForm() {
       });
   };
 
-  const getSchool = () => {
-    axios
-      .get(`${ApiUrl}/institute/school`)
-      .then((res) => {
-        setSchoolOptions(
-          res.data.data.map((obj) => ({
-            value: obj.school_id,
-            label: obj.school_name,
-          }))
-        );
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-
   const getDept = () => {
     axios
       .get(`${ApiUrl}/dept`)
@@ -109,7 +92,6 @@ function DepartmentAssignmentForm() {
   };
 
   const handleChange = (e) => {
-    console.log(values.schoolId.length);
     setValues((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -117,10 +99,30 @@ function DepartmentAssignmentForm() {
   };
 
   const handleChangeAdvance = (name, newValue) => {
-    setValues((prev) => ({
-      ...prev,
-      [name]: newValue,
-    }));
+    if (name === "deptId") {
+      axios
+        .get(`${ApiUrl}/allUnassignedSchoolToDepartment/${newValue}`)
+        .then((res) => {
+          setSchoolOptions(
+            res.data.data.map((obj) => ({
+              value: obj.school_id,
+              label: obj.school_name,
+            }))
+          );
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      setValues((prev) => ({
+        ...prev,
+        [name]: newValue,
+      }));
+    } else {
+      setValues((prev) => ({
+        ...prev,
+        [name]: newValue,
+      }));
+    }
   };
 
   const handleCreate = async (e) => {
@@ -140,13 +142,22 @@ function DepartmentAssignmentForm() {
       temp.school_id = values.schoolId;
       await axios
         .post(`${ApiUrl}/DepartmentAssignment`, temp)
-        .then((response) => {
-          setAlertMessage({
-            severity: "success",
-            message: "Form Submitted Successfully",
-          });
+        .then((res) => {
+          setLoading(false);
+          if (res.status === 200 || res.status === 201) {
+            navigate("/AcademicMaster", { replace: true });
+            setAlertMessage({
+              severity: "success",
+              message: "Form Submitted Successfully",
+            });
+          } else {
+            setAlertMessage({
+              severity: "error",
+              message: response.data.message,
+            });
+          }
+
           setAlertOpen(true);
-          navigate("/AcademicMaster", { replace: true });
         })
         .catch((error) => {
           setLoading(false);
@@ -174,15 +185,17 @@ function DepartmentAssignmentForm() {
       temp.dept_id = values.deptId;
       temp.priority = values.priority;
       temp.school_id = values.schoolId;
+
       await axios
         .put(`${ApiUrl}/DepartmentAssignment/${id}`, temp)
         .then((response) => {
+          setLoading(false);
           if (response.status === 200 || response.status === 201) {
+            navigate("/AcademicMaster", { replace: true });
             setAlertMessage({
               severity: "success",
               message: "Form Updated Successfully",
             });
-            navigate("/AcademicMaster", { replace: true });
           } else {
             setAlertMessage({
               severity: "error",

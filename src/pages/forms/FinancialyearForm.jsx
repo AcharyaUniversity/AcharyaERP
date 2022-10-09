@@ -146,7 +146,7 @@ function FinancialyearForm() {
         .then((res) => {
           setAlertMessage({
             severity: "success",
-            message: "Form Submitted Successfully",
+            message: "Form Updated Successfully",
           });
           setAlertOpen(true);
           navigate("/AcademicCalendars", { replace: true });
@@ -220,7 +220,7 @@ function FinancialyearForm() {
                   label="From Date"
                   value={values.fromDate}
                   handleChangeAdvance={handleChangeAdvance}
-                  maxDate={values.toDate ? values.toDate : new Date()}
+                  minDate={new Date()}
                   errors={["This field is required"]}
                   checks={[values.fromDate !== null]}
                   setFormValid={setFormValid}

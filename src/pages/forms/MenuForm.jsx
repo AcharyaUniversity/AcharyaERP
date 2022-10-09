@@ -87,6 +87,7 @@ function MenuForm() {
           menuShortName: res.data.data.menu_short_name,
           moduleIds: [res.data.data.module_id],
           description: res.data.data.menu_desc,
+          iconName: res.data.data.menu_icon_name,
         });
         setMenuId(res.data.data.menu_id);
         setCrumbs([
@@ -123,6 +124,7 @@ function MenuForm() {
       ...prev,
       iconName: icon,
     }));
+    setFormValid((prev) => ({ ...prev, iconName: true }));
   };
 
   const handleCreate = async () => {
@@ -132,31 +134,53 @@ function MenuForm() {
         message: "Please fill all fields",
       });
       setAlertOpen(true);
-      console.log("failed");
     } else {
       setLoading(true);
-      const temp = {};
-      temp.active = true;
-      temp.menu_name = values.menuName;
-      temp.menu_short_name = values.menuShortName;
-      temp.module_id = values.moduleIds;
-      temp.menu_desc = values.description;
-      temp.menu_icon_name = values.iconName;
-      await axios
-        .post(`${ApiUrl}/Menu`, temp)
+      await axios(
+        `${ApiUrl}/checkMenuNameAndShortName?menu_name=${values.menuName}&menu_short_name=${values.menuShortName}`
+      )
         .then((res) => {
-          setLoading(false);
-          if (res.status === 200 || res.status === 201) {
-            setAlertMessage({
-              severity: "success",
-              message: "Menu created",
-            });
-            setAlertOpen();
-            navigate("/NavigationMaster", { replace: true });
+          if (res.data.success) {
+            const temp = {};
+            temp.active = true;
+            temp.menu_name = values.menuName;
+            temp.menu_short_name = values.menuShortName;
+            temp.module_id = values.moduleIds;
+            temp.menu_desc = values.description;
+            temp.menu_icon_name = values.iconName;
+            axios
+              .post(`${ApiUrl}/Menu`, temp)
+              .then((res) => {
+                setLoading(false);
+                if (res.status === 200 || res.status === 201) {
+                  navigate("/NavigationMaster", { replace: true });
+                  setAlertMessage({
+                    severity: "success",
+                    message: "Menu created",
+                  });
+                } else {
+                  setAlertMessage({
+                    severity: "error",
+                    message: res.data ? res.data.message : "An error occured",
+                  });
+                }
+                setAlertOpen(true);
+              })
+              .catch((err) => {
+                setLoading(false);
+                setAlertMessage({
+                  severity: "error",
+                  message: err.response
+                    ? err.response.data.message
+                    : "An error occured",
+                });
+                setAlertOpen(true);
+              });
           } else {
+            setLoading(false);
             setAlertMessage({
               severity: "error",
-              message: res.data ? res.data.message : "An error occured",
+              message: "A menu with this name or short name already exists",
             });
             setAlertOpen(true);
           }
@@ -165,9 +189,7 @@ function MenuForm() {
           setLoading(false);
           setAlertMessage({
             severity: "error",
-            message: err.response
-              ? err.response.data.message
-              : "An error occured",
+            message: "A menu with this name or short name already exists",
           });
           setAlertOpen(true);
         });
@@ -188,7 +210,7 @@ function MenuForm() {
       temp.menu_id = menuId;
       temp.menu_name = values.menuName;
       temp.menu_short_name = values.menuShortName;
-      temp.module_id = values.moduleIds;
+      temp.module_id = values.moduleIds[0];
       temp.menu_desc = values.description;
       temp.menu_icon_name = values.iconName;
       await axios
@@ -196,27 +218,24 @@ function MenuForm() {
         .then((res) => {
           setLoading(false);
           if (res.status === 200 || res.status === 201) {
+            navigate("/NavigationMaster", { replace: true });
             setAlertMessage({
               severity: "success",
               message: "Menu updated",
             });
-            setAlertOpen();
-            navigate("/NavigationMaster", { replace: true });
           } else {
             setAlertMessage({
               severity: "error",
               message: res.data ? res.data.message : "An error occured",
             });
-            setAlertOpen(true);
           }
+          setAlertOpen(true);
         })
         .catch((err) => {
           setLoading(false);
           setAlertMessage({
             severity: "error",
-            message: err.response
-              ? err.response.data.message
-              : "An error occured",
+            message: "A menu with this name or short name already exists",
           });
           setAlertOpen(true);
         });
@@ -229,7 +248,7 @@ function MenuForm() {
         <Grid
           container
           alignItems="center"
-          justifyContent="flex-start"
+          justifyContent="center"
           rowSpacing={2}
           columnSpacing={{ xs: 2, md: 4 }}
         >
@@ -239,7 +258,6 @@ function MenuForm() {
               label="Menu"
               value={values.menuName ?? ""}
               handleChange={handleChange}
-              fullWidth
               errors={["This field required", "Enter Only Characters"]}
               checks={[
                 values.menuName !== "",
@@ -260,7 +278,6 @@ function MenuForm() {
                 minLength: 3,
                 maxLength: 3,
               }}
-              fullWidth
               errors={[
                 "This field required",
                 "Enter characters and its length should be three",
@@ -290,7 +307,7 @@ function MenuForm() {
           <Grid item xs={12} md={6}>
             <CustomTextField
               multiline
-              rows={4}
+              rows={2}
               name="description"
               label="Description"
               value={values.description ?? ""}
