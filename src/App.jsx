@@ -15,6 +15,7 @@ import FormExample from "./containers/examples/FormExample";
 // Master pages
 import InstituteMaster from "./pages/masters/InstituteMaster";
 import NavigationMaster from "./pages/masters/NavigationMaster";
+import DesignationMaster from "./pages/masters/DesignationMaster";
 
 // Institute master forms
 import SchoolForm from "./pages/forms/instituteMaster/SchoolForm";
@@ -27,6 +28,9 @@ import ModuleForm from "./pages/forms/navigationMaster/ModuleForm";
 import MenuForm from "./pages/forms/navigationMaster/MenuForm";
 import SubmenuForm from "./pages/forms/navigationMaster/SubmenuForm";
 import RoleForm from "./pages/forms/navigationMaster/RoleForm";
+
+//Designation Master forms
+import DesignationForm from "./pages/forms/DesignationMaster/DesignationForm";
 
 function App() {
   return (
@@ -147,6 +151,22 @@ function App() {
                   exact
                   path="/NavigationMaster/Role/Update/:id"
                   element={<RoleForm />}
+                />
+                {/* Designation Master */}
+                <Route
+                  exact
+                  path="/DesignationMaster"
+                  element={<DesignationMaster />}
+                />
+                <Route
+                  exact
+                  path="/DesignationMaster/Designation/New"
+                  element={<DesignationForm />}
+                />
+                <Route
+                  exact
+                  path="/DesignationMaster/Designation/Update/:id"
+                  element={<DesignationForm />}
                 />
               </>
             </Route>
