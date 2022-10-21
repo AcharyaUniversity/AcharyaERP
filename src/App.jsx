@@ -16,6 +16,7 @@ import FormExample from "./containers/examples/FormExample";
 import InstituteMaster from "./pages/masters/InstituteMaster";
 import NavigationMaster from "./pages/masters/NavigationMaster";
 import DesignationMaster from "./pages/masters/DesignationMaster";
+import TranscriptMaster from "./pages/masters/TranscriptMaster";
 
 // Institute master forms
 import SchoolForm from "./pages/forms/instituteMaster/SchoolForm";
@@ -31,6 +32,10 @@ import RoleForm from "./pages/forms/navigationMaster/RoleForm";
 
 //Designation Master forms
 import DesignationForm from "./pages/forms/DesignationMaster/DesignationForm";
+
+//Transcript Master forms
+import TranscriptForm from "./pages/forms/TranscriptMaster/TranscriptForm";
+import TranscriptAssignmentForm from "./pages/forms/TranscriptMaster/TranscriptAssignmentForm";
 
 function App() {
   return (
@@ -167,6 +172,28 @@ function App() {
                   exact
                   path="/DesignationMaster/Designation/Update/:id"
                   element={<DesignationForm />}
+                />
+                {/* Transcript Master */}
+
+                <Route
+                  exact
+                  path="/TranscriptMaster"
+                  element={<TranscriptMaster />}
+                />
+                <Route
+                  exact
+                  path="/TranscriptMaster/Transcript/New"
+                  element={<TranscriptForm />}
+                />
+                <Route
+                  exact
+                  path="/TranscriptMaster/Transcript/Update/:id"
+                  element={<TranscriptForm />}
+                />
+                <Route
+                  exact
+                  path="/TranscriptMaster/TranscriptAssignment/Assign"
+                  element={<TranscriptAssignmentForm />}
                 />
               </>
             </Route>

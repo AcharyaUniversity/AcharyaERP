@@ -9,18 +9,17 @@ import axios from "axios";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 
 const initialValues = {
-  designation: "",
+  transcript: "",
   shortName: "",
   priority: "",
 };
 
-const requiredFields = ["designation", "shortName", "priority"];
+const requiredFields = ["transcript", "shortName", "priority"];
 
-function DesignationForm() {
+function TranscriptForm() {
   const [isNew, setIsNew] = useState(true);
   const [values, setValues] = useState(initialValues);
-  const [DesignationId, setDesignationId] = useState(null);
-
+  const [transcriptId, setTranscriptId] = useState(null);
   const [loading, setLoading] = useState(false);
   const { setAlertMessage, setAlertOpen } = useAlert();
   const setCrumbs = useBreadcrumbs();
@@ -29,49 +28,64 @@ function DesignationForm() {
   const { pathname } = useLocation();
 
   const checks = {
-    designation: [values.designation !== ""],
-    shortName: [values.shortName !== ""],
+    transcript: [
+      values.transcript !== "",
+      values.transcript.trim().split(/ +/).join(" "),
+    ],
+    shortName: [
+      values.shortName !== "",
+      values.shortName.trim().split(/ +/).join(" "),
+    ],
     priority: [values.priority !== "", /^[0-9]*$/.test(values.priority)],
   };
 
   const errorMessages = {
-    designation: ["This field required"],
+    transcript: ["This field required"],
     shortName: ["This field required"],
     priority: ["This field is required", "Allow only Number"],
   };
+  const requiredFieldsValid = () => {
+    for (let i = 0; i < requiredFields.length; i++) {
+      const field = requiredFields[i];
+      if (Object.keys(checks).includes(field)) {
+        const ch = checks[field];
+        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
+      } else if (!values[field]) return false;
+    }
+    return true;
+  };
 
   useEffect(() => {
-    if (pathname.toLowerCase() === "/designationmaster/designation/new") {
+    if (pathname.toLowerCase() === "/transcriptmaster/transcript/new") {
       setIsNew(true);
       setCrumbs([
-        { name: "DesignationMaster", link: "/DesignationMaster" },
-        { name: "Designation" },
+        { name: "TranscriptMaster", link: "/TranscriptMaster" },
+        { name: "Transcript" },
         { name: "Create" },
       ]);
     } else {
       setIsNew(false);
-      getDesignationData();
+      getTranscriptData();
     }
   }, [pathname]);
 
-  const getDesignationData = () => {
+  const getTranscriptData = () => {
     axios
-      .get(`${ApiUrl}/employee/Designation/${id}`)
+      .get(`${ApiUrl}/academic/ProgramTranscript/${id}`)
       .then((res) => {
         setValues({
-          designation: res.data.data.designation_name,
-          shortName: res.data.data.designation_short_name,
+          transcript: res.data.data.transcript,
+          shortName: res.data.data.transcript_short_name,
           priority: res.data.data.priority,
         });
-        setDesignationId(res.data.data.designation_id);
+        setTranscriptId(res.data.data.trans_id);
         setCrumbs([
-          { name: "DesignationMaster", link: "/DesignationMaster" },
-          { name: "Designation" },
+          { name: "TranscriptMaster", link: "/TranscriptMaster" },
+          { name: "Transcript" },
           { name: "Update" },
-          { name: res.data.data.designation_name },
+          { name: res.data.data.transcript },
         ]);
       })
-
       .catch((error) => {
         console.error(error);
       });
@@ -90,19 +104,10 @@ function DesignationForm() {
       }));
     }
   };
-  const requiredFieldsValid = () => {
-    for (let i = 0; i < requiredFields.length; i++) {
-      const field = requiredFields[i];
-      if (Object.keys(checks).includes(field)) {
-        const ch = checks[field];
-        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
-      } else if (!values[field]) return false;
-    }
-    return true;
-  };
 
   const handleCreate = async () => {
     if (!requiredFieldsValid()) {
+      console.log("failed");
       setAlertMessage({
         severity: "error",
         message: "please fill all fields",
@@ -112,82 +117,78 @@ function DesignationForm() {
       setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.designation_name = values.designation;
-      temp.designation_short_name = values.shortName;
+      temp.transcript = values.transcript;
+      temp.transcript_short_name = values.shortName;
       temp.priority = values.priority;
 
       await axios
-        .post(`${ApiUrl}/employee/Designation`, temp)
+        .post(`${ApiUrl}/academic/ProgramTranscript`, temp)
         .then((res) => {
           setLoading(false);
-          if (res.status === 200 || res.status === 201) {
-            navigate("/DesignationMaster", { replace: true });
-            setAlertMessage({
-              severity: "success",
-              message: "Form Submitted Successfully",
-            });
-          } else {
-            setAlertMessage({
-              severity: "error",
-              message: res.data ? res.data.message : "An error occured",
-            });
-          }
+          setAlertMessage({
+            severity: "success",
+            message: res.data.message,
+          });
           setAlertOpen(true);
+          setAlertMessage({
+            severity: "success",
+            message: "Form Submitted Successfully",
+          });
+          navigate("/TranscriptMaster", { replace: true });
         })
         .catch((err) => {
           setLoading(false);
           setAlertMessage({
             severity: "error",
-            message: err.response
+            message: err.response.data
               ? err.response.data.message
-              : "An error occured",
+              : "Error submitting",
           });
           setAlertOpen(true);
+          console.log(err);
         });
     }
   };
 
   const handleUpdate = async () => {
     if (!requiredFieldsValid()) {
+      console.log("failed");
       setAlertMessage({
         severity: "error",
         message: "please fill all fields",
       });
       setAlertOpen(true);
     } else {
-      setLoading(true);
+      setLoading(false);
       const temp = {};
       temp.active = true;
-      temp.designation_id = DesignationId;
-      temp.designation_name = values.designation;
-      temp.designation_short_name = values.shortName;
+      temp.trans_id = transcriptId;
+      temp.transcript = values.transcript;
+      temp.transcript_short_name = values.shortName;
       temp.priority = values.priority;
 
       await axios
-        .put(`${ApiUrl}/employee/Designation/${id}`, temp)
+        .put(`${ApiUrl}/academic/ProgramTranscript/${id}`, temp)
         .then((res) => {
-          setLoading(false);
           if (res.status === 200 || res.status === 201) {
-            navigate("/DesignationMaster", { replace: true });
             setAlertMessage({
               severity: "success",
-              message: "Form Updated Successfully",
+              message: "Form Submitted Successfully",
             });
+            navigate("/TranscriptMaster", { replace: true });
           } else {
             setAlertMessage({
               severity: "error",
-              message: res.data ? res.data.message : "An error occured",
+              message: res.data.message,
             });
           }
           setAlertOpen(true);
         })
-        .catch((err) => {
+        .catch((error) => {
           setLoading(false);
           setAlertMessage({
             severity: "error",
-            message: err.response
-              ? err.response.data.message
-              : "An error occured",
+            message: error.response ? error.response.data.message : "Error",
           });
           setAlertOpen(true);
         });
@@ -202,31 +203,33 @@ function DesignationForm() {
           rowSpacing={4}
           columnSpacing={{ xs: 2, md: 4 }}
         >
-          <Grid item xs={12} md={6}>
+          <Grid item xs={6}>
             <CustomTextField
-              name="designation"
-              label="Designation"
-              value={values.designation ?? ""}
+              name="transcript"
+              label="Transcript"
               handleChange={handleChange}
-              checks={checks.designation}
-              errors={errorMessages.designation}
+              value={values.transcript ?? ""}
+              checks={checks.transcript}
+              errors={errorMessages.transcript}
               required
               fullWidth
             />
           </Grid>
-
           <Grid item xs={12} md={6}>
             <CustomTextField
               name="shortName"
               label="Short Name"
-              value={values.shortName ?? ""}
               handleChange={handleChange}
+              inputProps={{
+                style: { textTransform: "uppercase" },
+              }}
+              value={values.shortName ?? ""}
               checks={checks.shortName}
               errors={errorMessages.shortName}
               required
+              fullWidth
             />
           </Grid>
-
           <Grid item xs={12} md={6}>
             <CustomTextField
               name="priority"
@@ -273,4 +276,4 @@ function DesignationForm() {
   );
 }
 
-export default DesignationForm;
+export default TranscriptForm;
