@@ -8,18 +8,16 @@ import ApiUrl from "../../../services/Api";
 import axios from "axios";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 
-const initialValues = {
-  transcript: "",
+const initValues = {
+  measureName: "",
   shortName: "",
-  priority: "",
 };
+const requiredFields = ["measureName", "shortName"];
 
-const requiredFields = ["transcript", "shortName", "priority"];
-
-function TranscriptForm() {
+function MeasureForm() {
   const [isNew, setIsNew] = useState(true);
-  const [values, setValues] = useState(initialValues);
-  const [transcriptId, setTranscriptId] = useState(null);
+  const [values, setValues] = useState(initValues);
+  const [measureId, setMeasureId] = useState(null);
   const [loading, setLoading] = useState(false);
   const { setAlertMessage, setAlertOpen } = useAlert();
   const setCrumbs = useBreadcrumbs();
@@ -28,62 +26,52 @@ function TranscriptForm() {
   const { pathname } = useLocation();
 
   const checks = {
-    transcript: [
-      values.transcript !== "",
-      values.transcript.trim().split(/ +/).join(" "),
+    measureName: [
+      values.measureName !== "",
+      values.measureName.trim().split(/ +/).join(" "),
     ],
     shortName: [
       values.shortName !== "",
-      values.shortName.trim().split(/ +/).join(" "),
+      /^[A-Za-z ]{4}$/.test(values.shortName),
     ],
-    priority: [values.priority !== "", /^[0-9]*$/.test(values.priority)],
   };
 
   const errorMessages = {
-    transcript: ["This field required"],
-    shortName: ["This field required"],
-    priority: ["This field is required", "Allow only Number"],
-  };
-  const requiredFieldsValid = () => {
-    for (let i = 0; i < requiredFields.length; i++) {
-      const field = requiredFields[i];
-      if (Object.keys(checks).includes(field)) {
-        const ch = checks[field];
-        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
-      } else if (!values[field]) return false;
-    }
-    return true;
+    measureName: ["This field required"],
+    shortName: [
+      "This field required",
+      "Enter characters and its length should be four",
+    ],
   };
 
   useEffect(() => {
-    if (pathname.toLowerCase() === "/transcriptmaster/transcript/new") {
+    if (pathname.toLowerCase() === "/inventorymaster/measure/new") {
       setIsNew(true);
       setCrumbs([
-        { name: "TranscriptMaster", link: "/TranscriptMaster" },
-        { name: "Transcript" },
+        { name: "InventoryMaster", link: "/InventoryMaster" },
+        { name: "Measure" },
         { name: "Create" },
       ]);
     } else {
       setIsNew(false);
-      getTranscriptData();
+      getMeasureData();
     }
   }, [pathname]);
 
-  const getTranscriptData = () => {
-    axios
-      .get(`${ApiUrl}/academic/ProgramTranscript/${id}`)
+  const getMeasureData = async () => {
+    await axios
+      .get(`${ApiUrl}/measure/${id}`)
       .then((res) => {
         setValues({
-          transcript: res.data.data.transcript,
-          shortName: res.data.data.transcript_short_name,
-          priority: res.data.data.priority,
+          measureName: res.data.data.measure_name,
+          shortName: res.data.data.measure_short_name,
         });
-        setTranscriptId(res.data.data.trans_id);
+        setMeasureId(res.data.data.measure_id);
         setCrumbs([
-          { name: "TranscriptMaster", link: "/TranscriptMaster" },
-          { name: "Transcript" },
+          { name: "InventoryMaster", link: "/InventoryMaster" },
+          { name: "Measure" },
           { name: "Update" },
-          { name: res.data.data.transcript },
+          { name: res.data.data.MeasureName },
         ]);
       })
       .catch((error) => {
@@ -104,6 +92,16 @@ function TranscriptForm() {
       }));
     }
   };
+  const requiredFieldsValid = () => {
+    for (let i = 0; i < requiredFields.length; i++) {
+      const field = requiredFields[i];
+      if (Object.keys(checks).includes(field)) {
+        const ch = checks[field];
+        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
+      } else if (!values[field]) return false;
+    }
+    return true;
+  };
 
   const handleCreate = async () => {
     if (!requiredFieldsValid()) {
@@ -115,13 +113,12 @@ function TranscriptForm() {
     } else {
       setLoading(true);
       const temp = {};
-      temp.active = true;
-      temp.transcript = values.transcript;
-      temp.transcript_short_name = values.shortName;
-      temp.priority = values.priority;
+      temp.active = 1;
+      temp.measure_name = values.measureName;
+      temp.measure_short_name = values.shortName;
 
       await axios
-        .post(`${ApiUrl}/academic/ProgramTranscript`, temp)
+        .post(`${ApiUrl}/measure`, temp)
         .then((res) => {
           setLoading(false);
           setAlertMessage({
@@ -133,7 +130,7 @@ function TranscriptForm() {
             severity: "success",
             message: "Form Submitted Successfully",
           });
-          navigate("/TranscriptMaster", { replace: true });
+          navigate("/InventoryMaster", { replace: true });
         })
         .catch((err) => {
           setLoading(false);
@@ -157,24 +154,23 @@ function TranscriptForm() {
       });
       setAlertOpen(true);
     } else {
-      setLoading(false);
       const temp = {};
-      temp.active = true;
-      temp.trans_id = transcriptId;
-      temp.transcript = values.transcript;
-      temp.transcript_short_name = values.shortName;
-      temp.priority = values.priority;
+      temp.active = 1;
+      temp.measure_id = measureId;
+      temp.measure_name = values.measureName;
+      temp.measure_short_name = values.shortName;
 
       await axios
-        .put(`${ApiUrl}/academic/ProgramTranscript/${id}`, temp)
+        .put(`${ApiUrl}/updateMeasure/${id}`, temp)
         .then((res) => {
           if (res.status === 200 || res.status === 201) {
             setAlertMessage({
               severity: "success",
-              message: "Form Submitted Successfully",
+              message: "Form Updated Successfully",
             });
-            navigate("/TranscriptMaster", { replace: true });
+            navigate("/InventoryMaster", { replace: true });
           } else {
+            setLoading(false);
             setAlertMessage({
               severity: "error",
               message: res.data.message,
@@ -201,14 +197,14 @@ function TranscriptForm() {
           rowSpacing={4}
           columnSpacing={{ xs: 2, md: 4 }}
         >
-          <Grid item xs={6}>
+          <Grid item xs={12} md={6}>
             <CustomTextField
-              name="transcript"
-              label="Transcript"
+              name="measureName"
+              label="Measure"
+              value={values.measureName ?? ""}
               handleChange={handleChange}
-              value={values.transcript ?? ""}
-              checks={checks.transcript}
-              errors={errorMessages.transcript}
+              checks={checks.measureName}
+              errors={errorMessages.measureName}
               required
               fullWidth
             />
@@ -217,25 +213,16 @@ function TranscriptForm() {
             <CustomTextField
               name="shortName"
               label="Short Name"
-              handleChange={handleChange}
-              inputProps={{
-                style: { textTransform: "uppercase" },
-              }}
               value={values.shortName ?? ""}
+              handleChange={handleChange}
               checks={checks.shortName}
               errors={errorMessages.shortName}
-              required
+              inputProps={{
+                style: { textTransform: "uppercase" },
+                minLength: 1,
+                maxLength: 4,
+              }}
               fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <CustomTextField
-              name="priority"
-              label="Priority"
-              value={values.priority ?? ""}
-              handleChange={handleChange}
-              checks={checks.priority}
-              errors={errorMessages.priority}
               required
             />
           </Grid>
@@ -274,4 +261,4 @@ function TranscriptForm() {
   );
 }
 
-export default TranscriptForm;
+export default MeasureForm;

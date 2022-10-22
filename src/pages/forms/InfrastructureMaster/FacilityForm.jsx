@@ -8,18 +8,27 @@ import ApiUrl from "../../../services/Api";
 import axios from "axios";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 
-const initialValues = {
-  transcript: "",
+const initValues = {
+  typeOfFacility: "",
   shortName: "",
-  priority: "",
+  facilityCode: "",
+  description: "",
+  remarks: "",
 };
 
-const requiredFields = ["transcript", "shortName", "priority"];
+const requiredFields = [
+  "typeOfFacility",
+  "shortName",
+  "facilityCode",
+  "description",
+  "remarks",
+];
 
-function TranscriptForm() {
+function FacilityForm() {
   const [isNew, setIsNew] = useState(true);
-  const [values, setValues] = useState(initialValues);
-  const [transcriptId, setTranscriptId] = useState(null);
+  const [values, setValues] = useState(initValues);
+  const [facilityId, setFacilityId] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const { setAlertMessage, setAlertOpen } = useAlert();
   const setCrumbs = useBreadcrumbs();
@@ -28,64 +37,71 @@ function TranscriptForm() {
   const { pathname } = useLocation();
 
   const checks = {
-    transcript: [
-      values.transcript !== "",
-      values.transcript.trim().split(/ +/).join(" "),
+    typeOfFacility: [
+      values.typeOfFacility !== "",
+      values.typeOfFacility.trim().split(/ +/).join(" "),
     ],
     shortName: [
       values.shortName !== "",
       values.shortName.trim().split(/ +/).join(" "),
     ],
-    priority: [values.priority !== "", /^[0-9]*$/.test(values.priority)],
+    facilityCode: [
+      values.facilityCode !== "",
+      values.facilityCode.trim().split(/ +/).join(" "),
+    ],
+    description: [
+      values.description !== "",
+      values.description.trim().split(/ +/).join(" "),
+    ],
+    remarks: [
+      values.remarks !== "",
+      values.remarks.trim().split(/ +/).join(" "),
+    ],
   };
 
   const errorMessages = {
-    transcript: ["This field required"],
+    typeOfFacility: ["This field required"],
     shortName: ["This field required"],
-    priority: ["This field is required", "Allow only Number"],
-  };
-  const requiredFieldsValid = () => {
-    for (let i = 0; i < requiredFields.length; i++) {
-      const field = requiredFields[i];
-      if (Object.keys(checks).includes(field)) {
-        const ch = checks[field];
-        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
-      } else if (!values[field]) return false;
-    }
-    return true;
+    facilityCode: ["This field is required"],
+    description: ["This field is required"],
+    remarks: ["This field is required"],
   };
 
   useEffect(() => {
-    if (pathname.toLowerCase() === "/transcriptmaster/transcript/new") {
+    if (pathname.toLowerCase() === "/infrastructuremaster/facility/new") {
       setIsNew(true);
+
       setCrumbs([
-        { name: "TranscriptMaster", link: "/TranscriptMaster" },
-        { name: "Transcript" },
+        { name: "InfrastructureMaster", link: "/InfrastructureMaster" },
+        { name: "Facility" },
         { name: "Create" },
       ]);
     } else {
       setIsNew(false);
-      getTranscriptData();
+      getFaciltyData();
     }
   }, [pathname]);
 
-  const getTranscriptData = () => {
+  const getFaciltyData = () => {
     axios
-      .get(`${ApiUrl}/academic/ProgramTranscript/${id}`)
+      .get(`${ApiUrl}/facilityType/${id}`)
       .then((res) => {
         setValues({
-          transcript: res.data.data.transcript,
-          shortName: res.data.data.transcript_short_name,
-          priority: res.data.data.priority,
+          typeOfFacility: res.data.data.facility_type_name,
+          shortName: res.data.data.facility_short_name,
+          facilityCode: res.data.data.facility_code,
+          description: res.data.data.description,
+          remarks: res.data.data.remarks,
         });
-        setTranscriptId(res.data.data.trans_id);
+        setFacilityId(res.data.data.facility_type_id);
         setCrumbs([
-          { name: "TranscriptMaster", link: "/TranscriptMaster" },
-          { name: "Transcript" },
+          { name: "InfrastructureMaster", link: "/InfrastructureMaster" },
+          { name: "Facility" },
           { name: "Update" },
-          { name: res.data.data.transcript },
+          { name: res.data.data.facility_type_name },
         ]);
       })
+
       .catch((error) => {
         console.error(error);
       });
@@ -104,6 +120,16 @@ function TranscriptForm() {
       }));
     }
   };
+  const requiredFieldsValid = () => {
+    for (let i = 0; i < requiredFields.length; i++) {
+      const field = requiredFields[i];
+      if (Object.keys(checks).includes(field)) {
+        const ch = checks[field];
+        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
+      } else if (!values[field]) return false;
+    }
+    return true;
+  };
 
   const handleCreate = async () => {
     if (!requiredFieldsValid()) {
@@ -116,12 +142,14 @@ function TranscriptForm() {
       setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.transcript = values.transcript;
-      temp.transcript_short_name = values.shortName;
-      temp.priority = values.priority;
+      temp.facility_type_name = values.typeOfFacility;
+      temp.facility_short_name = values.shortName;
+      temp.facility_code = values.facilityCode;
+      temp.description = values.description;
+      temp.remarks = values.remarks;
 
       await axios
-        .post(`${ApiUrl}/academic/ProgramTranscript`, temp)
+        .post(`${ApiUrl}/facilityType`, temp)
         .then((res) => {
           setLoading(false);
           setAlertMessage({
@@ -133,7 +161,7 @@ function TranscriptForm() {
             severity: "success",
             message: "Form Submitted Successfully",
           });
-          navigate("/TranscriptMaster", { replace: true });
+          navigate("/InfrastructureMaster", { replace: true });
         })
         .catch((err) => {
           setLoading(false);
@@ -157,24 +185,27 @@ function TranscriptForm() {
       });
       setAlertOpen(true);
     } else {
-      setLoading(false);
+      setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.trans_id = transcriptId;
-      temp.transcript = values.transcript;
-      temp.transcript_short_name = values.shortName;
-      temp.priority = values.priority;
+      temp.facility_type_id = facilityId;
+      temp.facility_type_name = values.typeOfFacility;
+      temp.facility_short_name = values.shortName;
+      temp.facility_code = values.facilityCode;
+      temp.description = values.description;
+      temp.remarks = values.remarks;
 
       await axios
-        .put(`${ApiUrl}/academic/ProgramTranscript/${id}`, temp)
+        .put(`${ApiUrl}/facilityType/${id}`, temp)
         .then((res) => {
           if (res.status === 200 || res.status === 201) {
             setAlertMessage({
               severity: "success",
-              message: "Form Submitted Successfully",
+              message: "Form Updated Successfully",
             });
-            navigate("/TranscriptMaster", { replace: true });
+            navigate("/InfrastructureMaster", { replace: true });
           } else {
+            setLoading(false);
             setAlertMessage({
               severity: "error",
               message: res.data.message,
@@ -201,14 +232,14 @@ function TranscriptForm() {
           rowSpacing={4}
           columnSpacing={{ xs: 2, md: 4 }}
         >
-          <Grid item xs={6}>
+          <Grid item xs={12} md={6}>
             <CustomTextField
-              name="transcript"
-              label="Transcript"
+              name="typeOfFacility"
+              label="Type Of Facility"
+              value={values.typeOfFacility ?? ""}
               handleChange={handleChange}
-              value={values.transcript ?? ""}
-              checks={checks.transcript}
-              errors={errorMessages.transcript}
+              checks={checks.typeOfFacility}
+              errors={errorMessages.typeOfFacility}
               required
               fullWidth
             />
@@ -217,26 +248,60 @@ function TranscriptForm() {
             <CustomTextField
               name="shortName"
               label="Short Name"
-              handleChange={handleChange}
               inputProps={{
                 style: { textTransform: "uppercase" },
               }}
               value={values.shortName ?? ""}
+              handleChange={handleChange}
               checks={checks.shortName}
               errors={errorMessages.shortName}
-              required
               fullWidth
+              required
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <CustomTextField
-              name="priority"
-              label="Priority"
-              value={values.priority ?? ""}
+              name="facilityCode"
+              label="Facility Code"
+              inputProps={{
+                style: { textTransform: "uppercase" },
+              }}
+              value={values.facilityCode ?? ""}
               handleChange={handleChange}
-              checks={checks.priority}
-              errors={errorMessages.priority}
+              checks={checks.facilityCode}
+              errors={errorMessages.facilityCode}
+              fullWidth
               required
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <CustomTextField
+              rows={2}
+              multiline
+              name="description"
+              label="Description"
+              value={values.description ?? ""}
+              handleChange={handleChange}
+              checks={checks.description}
+              errors={errorMessages.description}
+              required
+              fullWidth
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <CustomTextField
+              rows={2}
+              multiline
+              name="remarks"
+              label="Remarks"
+              handleChange={handleChange}
+              value={values.remarks ?? ""}
+              checks={checks.remarks}
+              errors={errorMessages.remarks}
+              required
+              fullWidth
             />
           </Grid>
 
@@ -274,4 +339,4 @@ function TranscriptForm() {
   );
 }
 
-export default TranscriptForm;
+export default FacilityForm;

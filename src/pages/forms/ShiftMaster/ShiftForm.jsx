@@ -7,19 +7,25 @@ import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
 import ApiUrl from "../../../services/Api";
 import axios from "axios";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
+import CustomTimePicker from "../../../components/Inputs/CustomTimePicker";
+import { convertTimeToString } from "../../../utils/DateTimeUtils";
+import { convertDateToString } from "../../../utils/DateTimeUtils";
 
-const initialValues = {
-  transcript: "",
-  shortName: "",
-  priority: "",
+import dayjs from "dayjs";
+
+const initValues = {
+  shiftName: "",
+  startTime: null,
+  endTime: null,
 };
 
-const requiredFields = ["transcript", "shortName", "priority"];
+const requiredFields = ["shiftName", "startTime", "endTime"];
 
-function TranscriptForm() {
+function ShiftForm() {
   const [isNew, setIsNew] = useState(true);
-  const [values, setValues] = useState(initialValues);
-  const [transcriptId, setTranscriptId] = useState(null);
+  const [values, setValues] = useState(initValues);
+  const [ShiftId, setShiftId] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const { setAlertMessage, setAlertOpen } = useAlert();
   const setCrumbs = useBreadcrumbs();
@@ -27,68 +33,59 @@ function TranscriptForm() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const checks = {
-    transcript: [
-      values.transcript !== "",
-      values.transcript.trim().split(/ +/).join(" "),
-    ],
-    shortName: [
-      values.shortName !== "",
-      values.shortName.trim().split(/ +/).join(" "),
-    ],
-    priority: [values.priority !== "", /^[0-9]*$/.test(values.priority)],
-  };
-
-  const errorMessages = {
-    transcript: ["This field required"],
-    shortName: ["This field required"],
-    priority: ["This field is required", "Allow only Number"],
-  };
-  const requiredFieldsValid = () => {
-    for (let i = 0; i < requiredFields.length; i++) {
-      const field = requiredFields[i];
-      if (Object.keys(checks).includes(field)) {
-        const ch = checks[field];
-        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
-      } else if (!values[field]) return false;
-    }
-    return true;
-  };
-
   useEffect(() => {
-    if (pathname.toLowerCase() === "/transcriptmaster/transcript/new") {
+    if (pathname.toLowerCase() === "/shiftmaster/shift/new") {
       setIsNew(true);
       setCrumbs([
-        { name: "TranscriptMaster", link: "/TranscriptMaster" },
-        { name: "Transcript" },
+        { name: "ShiftMaster", link: "/ShiftMaster" },
+        { name: "Shift" },
         { name: "Create" },
       ]);
     } else {
       setIsNew(false);
-      getTranscriptData();
+      getShiftData();
     }
   }, [pathname]);
 
-  const getTranscriptData = () => {
+  const checks = {
+    shiftName: [values.shiftName !== ""],
+    startTime: [values.shortName !== null],
+    endTime: [values.endTime !== null],
+  };
+
+  const errorMessages = {
+    shiftName: ["This field required"],
+    startTime: ["This field required"],
+    endTime: ["This field is required"],
+  };
+
+  const getShiftData = () => {
     axios
-      .get(`${ApiUrl}/academic/ProgramTranscript/${id}`)
+      .get(`${ApiUrl}/employee/Shift/${id}`)
       .then((res) => {
         setValues({
-          transcript: res.data.data.transcript,
-          shortName: res.data.data.transcript_short_name,
-          priority: res.data.data.priority,
+          shiftName: res.data.data.shiftName,
+          startTime: dayjs(res.data.data.frontend_use_start_time),
+          endTime: dayjs(res.data.data.frontend_use_end_time),
         });
-        setTranscriptId(res.data.data.trans_id);
+        setShiftId(res.data.data.shiftCategoryId);
         setCrumbs([
-          { name: "TranscriptMaster", link: "/TranscriptMaster" },
-          { name: "Transcript" },
+          { name: "ShiftMaster", link: "/ShiftMaster" },
+          { name: "Shift" },
           { name: "Update" },
-          { name: res.data.data.transcript },
+          { name: res.data.data.shiftName },
         ]);
       })
+
       .catch((error) => {
         console.error(error);
       });
+  };
+  const handleChangeAdvance = (name, newValue) => {
+    setValues((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
   };
 
   const handleChange = (e) => {
@@ -104,6 +101,16 @@ function TranscriptForm() {
       }));
     }
   };
+  const requiredFieldsValid = () => {
+    for (let i = 0; i < requiredFields.length; i++) {
+      const field = requiredFields[i];
+      if (Object.keys(checks).includes(field)) {
+        const ch = checks[field];
+        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
+      } else if (!values[field]) return false;
+    }
+    return true;
+  };
 
   const handleCreate = async () => {
     if (!requiredFieldsValid()) {
@@ -116,12 +123,14 @@ function TranscriptForm() {
       setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.transcript = values.transcript;
-      temp.transcript_short_name = values.shortName;
-      temp.priority = values.priority;
+      temp.shiftName = values.shiftName;
+      temp.frontend_use_start_time = values.startTime;
+      temp.frontend_use_end_time = values.endTime;
+      temp.shiftStartTime = convertTimeToString(dayjs(values.startTime).$d);
+      temp.shiftEndTime = convertTimeToString(dayjs(values.endTime).$d);
 
       await axios
-        .post(`${ApiUrl}/academic/ProgramTranscript`, temp)
+        .post(`${ApiUrl}/employee/Shift`, temp)
         .then((res) => {
           setLoading(false);
           setAlertMessage({
@@ -133,7 +142,7 @@ function TranscriptForm() {
             severity: "success",
             message: "Form Submitted Successfully",
           });
-          navigate("/TranscriptMaster", { replace: true });
+          navigate("/ShiftMaster", { replace: true });
         })
         .catch((err) => {
           setLoading(false);
@@ -157,24 +166,25 @@ function TranscriptForm() {
       });
       setAlertOpen(true);
     } else {
-      setLoading(false);
+      setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.trans_id = transcriptId;
-      temp.transcript = values.transcript;
-      temp.transcript_short_name = values.shortName;
-      temp.priority = values.priority;
+      temp.shiftCategoryId = ShiftId;
+      temp.shiftName = values.shiftName;
+      temp.frontend_use_start_time = values.startTime;
+      temp.frontend_use_end_time = values.endTime;
 
       await axios
-        .put(`${ApiUrl}/academic/ProgramTranscript/${id}`, temp)
+        .put(`${ApiUrl}/employee/Shift/${id}`, temp)
         .then((res) => {
           if (res.status === 200 || res.status === 201) {
             setAlertMessage({
               severity: "success",
-              message: "Form Submitted Successfully",
+              message: "Form Updated Successfully",
             });
-            navigate("/TranscriptMaster", { replace: true });
+            navigate("/ShiftMaster", { replace: true });
           } else {
+            setLoading(false);
             setAlertMessage({
               severity: "error",
               message: res.data.message,
@@ -201,42 +211,43 @@ function TranscriptForm() {
           rowSpacing={4}
           columnSpacing={{ xs: 2, md: 4 }}
         >
-          <Grid item xs={6}>
+          <Grid item xs={12} md={6}>
             <CustomTextField
-              name="transcript"
-              label="Transcript"
+              name="shiftName"
+              label="Shift Name"
+              value={values.shiftName ?? ""}
               handleChange={handleChange}
-              value={values.transcript ?? ""}
-              checks={checks.transcript}
-              errors={errorMessages.transcript}
+              checks={checks.shiftName}
+              errors={errorMessages.shiftName}
               required
               fullWidth
+              helperText=" "
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <CustomTimePicker
+              name="startTime"
+              label="Start time"
+              value={values.startTime ?? null}
+              handleChangeAdvance={handleChangeAdvance}
+              seconds
+              checks={checks.startTime}
+              errors={errorMessages.startTime}
+              required
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <CustomTextField
-              name="shortName"
-              label="Short Name"
-              handleChange={handleChange}
-              inputProps={{
-                style: { textTransform: "uppercase" },
-              }}
-              value={values.shortName ?? ""}
-              checks={checks.shortName}
-              errors={errorMessages.shortName}
+            <CustomTimePicker
+              name="endTime"
+              label="End time"
+              value={values.endTime ?? null}
+              handleChangeAdvance={handleChangeAdvance}
+              seconds
+              checks={checks.endTime}
+              errors={errorMessages.endTime}
               required
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <CustomTextField
-              name="priority"
-              label="Priority"
-              value={values.priority ?? ""}
-              handleChange={handleChange}
-              checks={checks.priority}
-              errors={errorMessages.priority}
-              required
+              disabled={!values.startTime}
             />
           </Grid>
 
@@ -274,4 +285,4 @@ function TranscriptForm() {
   );
 }
 
-export default TranscriptForm;
+export default ShiftForm;

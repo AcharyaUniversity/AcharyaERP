@@ -2,24 +2,30 @@ import { useState, useEffect } from "react";
 import { Box, Grid, Button, CircularProgress } from "@mui/material";
 import FormWrapper from "../../../components/FormWrapper";
 import CustomTextField from "../../../components/Inputs/CustomTextField";
+import CustomMultipleAutocomplete from "../../../components/Inputs/CustomMultipleAutocomplete";
 import useAlert from "../../../hooks/useAlert";
 import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
 import ApiUrl from "../../../services/Api";
 import axios from "axios";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
+import CustomAutocomplete from "../../../components/Inputs/CustomAutocomplete";
 
-const initialValues = {
-  transcript: "",
-  shortName: "",
-  priority: "",
+const initValues = {
+  sectionName: "",
+  schoolId: [],
+  volume: "",
+  remarks: "",
+  schoolIdOne: null,
 };
 
-const requiredFields = ["transcript", "shortName", "priority"];
+const requiredFields = ["sectionName", "volume", "remarks", "schoolIdOne"];
 
-function TranscriptForm() {
+function SectionForm() {
   const [isNew, setIsNew] = useState(true);
-  const [values, setValues] = useState(initialValues);
-  const [transcriptId, setTranscriptId] = useState(null);
+  const [values, setValues] = useState(initValues);
+  const [SectionId, setSectionId] = useState(null);
+
+  const [schoolShortName, setSchoolName] = useState([]);
   const [loading, setLoading] = useState(false);
   const { setAlertMessage, setAlertOpen } = useAlert();
   const setCrumbs = useBreadcrumbs();
@@ -28,67 +34,77 @@ function TranscriptForm() {
   const { pathname } = useLocation();
 
   const checks = {
-    transcript: [
-      values.transcript !== "",
-      values.transcript.trim().split(/ +/).join(" "),
-    ],
-    shortName: [
-      values.shortName !== "",
-      values.shortName.trim().split(/ +/).join(" "),
-    ],
-    priority: [values.priority !== "", /^[0-9]*$/.test(values.priority)],
+    sectionName: [values.sectionName !== ""],
+    schoolIdOne: [values.schoolIdOne !== ""],
+    volume: [values.volume !== "", /^[0-9]*$/.test(values.volume)],
+    remarks: [values.remarks !== ""],
   };
 
   const errorMessages = {
-    transcript: ["This field required"],
-    shortName: ["This field required"],
-    priority: ["This field is required", "Allow only Number"],
-  };
-  const requiredFieldsValid = () => {
-    for (let i = 0; i < requiredFields.length; i++) {
-      const field = requiredFields[i];
-      if (Object.keys(checks).includes(field)) {
-        const ch = checks[field];
-        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
-      } else if (!values[field]) return false;
-    }
-    return true;
+    sectionName: ["This field required", "Enter Only Characters"],
+    schoolIdOne: ["This field required"],
+    volume: ["This field is required", "Allow only Number"],
+    remarks: ["This field required"],
   };
 
   useEffect(() => {
-    if (pathname.toLowerCase() === "/transcriptmaster/transcript/new") {
+    if (pathname.toLowerCase() === "/academicmaster/section/new") {
       setIsNew(true);
       setCrumbs([
-        { name: "TranscriptMaster", link: "/TranscriptMaster" },
-        { name: "Transcript" },
+        { name: "AcademicMaster", link: "/AcademicMaster" },
+        { name: "Section" },
         { name: "Create" },
       ]);
     } else {
       setIsNew(false);
-      getTranscriptData();
+      getSectionData();
     }
   }, [pathname]);
+  const handleChangeSchool = (name, newValue) => {
+    setValues((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
+  };
 
-  const getTranscriptData = () => {
-    axios
-      .get(`${ApiUrl}/academic/ProgramTranscript/${id}`)
+  const getSectionData = async () => {
+    await axios
+      .get(`${ApiUrl}/academic/Section/${id}`)
       .then((res) => {
         setValues({
-          transcript: res.data.data.transcript,
-          shortName: res.data.data.transcript_short_name,
-          priority: res.data.data.priority,
+          sectionName: res.data.data.section_name,
+          schoolIdOne: res.data.data.school_id,
+          volume: res.data.data.volume,
+          remarks: res.data.data.remarks,
         });
-        setTranscriptId(res.data.data.trans_id);
+        setSectionId(res.data.data.section_id);
         setCrumbs([
-          { name: "TranscriptMaster", link: "/TranscriptMaster" },
-          { name: "Transcript" },
+          { name: "AcademicMaster", link: "/AcademicMaster" },
+          { name: "Section" },
           { name: "Update" },
-          { name: res.data.data.transcript },
+          { name: res.data.data.section_name },
         ]);
       })
+
       .catch((error) => {
         console.error(error);
       });
+  };
+  useEffect(() => {
+    getSchoolName();
+  }, []);
+  const getSchoolName = async () => {
+    await axios
+      .get(`${ApiUrl}/institute/school`)
+      .then((res) => {
+        setSchoolName(
+          res.data.data.map((object) => ({
+            value: object.school_id,
+            label: object.school_name_short,
+          }))
+        );
+      })
+      .catch((err) => console.error(err));
   };
 
   const handleChange = (e) => {
@@ -104,6 +120,16 @@ function TranscriptForm() {
       }));
     }
   };
+  const requiredFieldsValid = () => {
+    for (let i = 0; i < requiredFields.length; i++) {
+      const field = requiredFields[i];
+      if (Object.keys(checks).includes(field)) {
+        const ch = checks[field];
+        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
+      } else if (!values[field]) return false;
+    }
+    return true;
+  };
 
   const handleCreate = async () => {
     if (!requiredFieldsValid()) {
@@ -116,12 +142,13 @@ function TranscriptForm() {
       setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.transcript = values.transcript;
-      temp.transcript_short_name = values.shortName;
-      temp.priority = values.priority;
+      temp.sectionName = values.sectionName;
+      temp.volume = values.volume;
+      temp.remarks = values.remarks;
+      temp.school_id = values.schoolId;
 
       await axios
-        .post(`${ApiUrl}/academic/ProgramTranscript`, temp)
+        .post(`${ApiUrl}/academic/Section`, temp)
         .then((res) => {
           setLoading(false);
           setAlertMessage({
@@ -133,7 +160,7 @@ function TranscriptForm() {
             severity: "success",
             message: "Form Submitted Successfully",
           });
-          navigate("/TranscriptMaster", { replace: true });
+          navigate("/AcademicMaster", { replace: true });
         })
         .catch((err) => {
           setLoading(false);
@@ -157,24 +184,26 @@ function TranscriptForm() {
       });
       setAlertOpen(true);
     } else {
-      setLoading(false);
+      setLoading(true);
       const temp = {};
       temp.active = true;
-      temp.trans_id = transcriptId;
-      temp.transcript = values.transcript;
-      temp.transcript_short_name = values.shortName;
-      temp.priority = values.priority;
+      temp.section_name = values.sectionName;
+      temp.section_id = SectionId;
+      temp.volume = values.volume;
+      temp.remarks = values.remarks;
+      temp.school_id = values.schoolIdOne;
 
       await axios
-        .put(`${ApiUrl}/academic/ProgramTranscript/${id}`, temp)
+        .put(`${ApiUrl}/academic/Section/${id}`, temp)
         .then((res) => {
           if (res.status === 200 || res.status === 201) {
             setAlertMessage({
               severity: "success",
-              message: "Form Submitted Successfully",
+              message: "Form Updated Successfully",
             });
-            navigate("/TranscriptMaster", { replace: true });
+            navigate("/AcademicMaster", { replace: true });
           } else {
+            setLoading(false);
             setAlertMessage({
               severity: "error",
               message: res.data.message,
@@ -201,41 +230,62 @@ function TranscriptForm() {
           rowSpacing={4}
           columnSpacing={{ xs: 2, md: 4 }}
         >
-          <Grid item xs={6}>
+          <Grid item xs={12} md={6}>
             <CustomTextField
-              name="transcript"
-              label="Transcript"
+              name="sectionName"
+              label="Section Name"
+              value={values.sectionName ?? ""}
               handleChange={handleChange}
-              value={values.transcript ?? ""}
-              checks={checks.transcript}
-              errors={errorMessages.transcript}
+              checks={checks.sectionName}
+              errors={errorMessages.sectionName}
               required
-              fullWidth
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            {isNew ? (
+              <CustomMultipleAutocomplete
+                name="schoolId"
+                label="School Name"
+                value={values.schoolId}
+                options={schoolShortName}
+                handleChangeAdvance={handleChangeSchool}
+                required
+              />
+            ) : (
+              <CustomAutocomplete
+                name="schoolIdOne"
+                label="School"
+                options={schoolShortName}
+                handleChangeAdvance={handleChangeSchool}
+                value={values.schoolIdOne ?? ""}
+                checks={checks.schoolIdOne}
+                errors={errorMessages.schoolIdOne}
+              />
+            )}
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <CustomTextField
+              name="volume"
+              label="Volume"
+              value={values.volume ?? ""}
+              handleChange={handleChange}
+              checks={checks.volume}
+              errors={errorMessages.volume}
+              required
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <CustomTextField
-              name="shortName"
-              label="Short Name"
+              rows={2}
+              multiline
+              name="remarks"
+              label="Remarks"
+              value={values.remarks ?? ""}
               handleChange={handleChange}
-              inputProps={{
-                style: { textTransform: "uppercase" },
-              }}
-              value={values.shortName ?? ""}
-              checks={checks.shortName}
-              errors={errorMessages.shortName}
-              required
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <CustomTextField
-              name="priority"
-              label="Priority"
-              value={values.priority ?? ""}
-              handleChange={handleChange}
-              checks={checks.priority}
-              errors={errorMessages.priority}
+              checks={checks.remarks}
+              errors={errorMessages.remarks}
               required
             />
           </Grid>
@@ -274,4 +324,4 @@ function TranscriptForm() {
   );
 }
 
-export default TranscriptForm;
+export default SectionForm;

@@ -107,7 +107,6 @@ function TranscriptAssignmentForm() {
       temp.active = true;
       temp.program_id = values.program_id;
       temp.trans_id = values.trans_id;
-      console.log(temp);
       await axios
         .post(`${ApiUrl}/academic/ProgramTranscriptDetails`, temp)
         .then((res) => {

@@ -211,7 +211,6 @@ function DesignationForm() {
               checks={checks.designation}
               errors={errorMessages.designation}
               required
-              fullWidth
             />
           </Grid>
 
