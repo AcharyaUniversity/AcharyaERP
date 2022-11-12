@@ -28,6 +28,15 @@ import MenuForm from "./pages/forms/navigationMaster/MenuForm";
 import SubmenuForm from "./pages/forms/navigationMaster/SubmenuForm";
 import RoleForm from "./pages/forms/navigationMaster/RoleForm";
 
+//UserCreation
+import UserForm from "./pages/forms/UserForm";
+import UserIndex from "./containers/indeces/UserIndex";
+
+//JobPortalMaster
+import JobPortal from "./containers/indeces/jobPortalMaster/JobPortal";
+import CandidateAttachmentView from "./pages/forms/jobPortal/CandidateAttachmentView";
+import InterView from "./pages/forms/jobPortal/InterView";
+
 function App() {
   return (
     <ThemeContextProvider>
@@ -148,8 +157,26 @@ function App() {
                   path="/NavigationMaster/Role/Update/:id"
                   element={<RoleForm />}
                 />
+                <Route exact path="/UserForm" element={<UserForm />} />
+                <Route exact path="/UserIndex" element={<UserIndex />} />
+                <Route exact path="/JobPortal" element={<JobPortal />} />
+                <Route
+                  exact
+                  path="/Interview/New/:id"
+                  element={<InterView />}
+                />
+                <Route
+                  exact
+                  path="/Interview/Update/:id"
+                  element={<InterView />}
+                />
               </>
             </Route>
+            <Route
+              exact
+              path="/CandidateAttachment/:id/:type"
+              element={<CandidateAttachmentView />}
+            />
           </Routes>
         </Router>
       </AlertContextProvider>
