@@ -15,9 +15,7 @@ import FormExample from "./containers/examples/FormExample";
 // Master pages
 import InstituteMaster from "./pages/masters/InstituteMaster";
 import NavigationMaster from "./pages/masters/NavigationMaster";
-
 import DesignationMaster from "./pages/masters/DesignationMaster";
-
 import ShiftMaster from "./pages/masters/ShiftMaster";
 
 // Institute master forms

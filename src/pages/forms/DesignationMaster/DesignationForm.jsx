@@ -13,7 +13,6 @@ const initialValues = {
   shortName: "",
   priority: "",
 };
-
 const requiredFields = ["designation", "shortName", "priority"];
 
 function DesignationForm() {
