@@ -114,7 +114,7 @@ function CourseAssignment() {
     if (pathname.toLowerCase() === "/courseassignment") {
       setIsNew(true);
       setCrumbs([
-        { name: "Course Master", link: "/CourseMaster/Assignment" },
+        { name: "Course Master", link: "/CourseAssignmentIndex" },
         { name: "Course Assignment" },
         { name: "Create" },
       ]);
@@ -353,7 +353,7 @@ function CourseAssignment() {
         });
         setCourseAssignmentId(data.course_assignment_id);
         setCrumbs([
-          { name: "Course Master", link: "/CourseMaster/Assignment" },
+          { name: "Course Master", link: "/CourseAssignmentIndex" },
           { name: "Course Assignment" },
           { name: "Update" },
         ]);
@@ -498,7 +498,6 @@ function CourseAssignment() {
       temp.course_id = values.courseId;
       temp.course_category_id = values.courseCategoryId;
       temp.course_type_id = values.courseTypeId;
-
       temp.program_assignment_id = programAssignmentId;
       temp.year_sem = values.yearSemId;
       temp.lecture = values.lecture;
@@ -508,8 +507,10 @@ function CourseAssignment() {
       temp.duration = values.durationHrs;
       temp.cie_marks = values.cieMarks;
       temp.see_marks = values.seeMarks;
-      temp.course_price = values.coursePriceInr;
-      temp.course_price_usd = values.coursePriceUsd;
+      temp.course_price = values.coursePriceInr ? values.coursePriceInr : null;
+      temp.course_price_usd = values.coursePriceUsd
+        ? values.coursePriceUsd
+        : null;
       temp.remarks = values.remarks;
 
       await axios
@@ -517,7 +518,7 @@ function CourseAssignment() {
         .then((res) => {
           setLoading(false);
           if (res.status === 200 || res.status === 201) {
-            navigate("/CourseMaster/Assignment", { replace: true });
+            navigate("/CourseAssignmentIndex", { replace: true });
             setAlertMessage({
               severity: "success",
               message: "Course  Assigned",
@@ -617,6 +618,10 @@ function CourseAssignment() {
           return obj.course_category_code;
         })
         .toString();
+      temp.course_price = values.coursePriceInr ? values.coursePriceInr : null;
+      temp.course_price_usd = values.coursePriceUsd
+        ? values.coursePriceUsd
+        : null;
 
       await axios
         .put(`/api/academic/CourseAssignment/${id}`, temp)
@@ -627,7 +632,7 @@ function CourseAssignment() {
               severity: "success",
               message: "Updated",
             });
-            navigate("/CourseMaster/Assignment", { replace: true });
+            navigate("/CourseAssignmentIndex", { replace: true });
           } else {
             setAlertMessage({
               severity: "error",

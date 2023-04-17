@@ -66,7 +66,7 @@ function TimeSlotsIndex() {
     },
     {
       field: "classTimetable",
-      headerName: "Class Time Time",
+      headerName: "TT Status",
       flex: 1,
     },
     { field: "created_username", headerName: "Created By", flex: 1 },

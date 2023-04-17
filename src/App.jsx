@@ -158,6 +158,7 @@ import CoursePatternIndex from "./containers/indeces/CourseMaster/CoursePatternI
 import CourseTypeForm from "./pages/forms/courseMaster/CourseTypeForm";
 import CourseCategoryForm from "./pages/forms/courseMaster/CourseCategoryForm";
 import CourseStudentAssignment from "./pages/forms/courseMaster/CourseStudentAssignment";
+import CourseStudentAssignmentIndex from "./containers/indeces/CourseMaster/CourseStudentAssignmentIndex";
 import CourseObjectiveForm from "./pages/forms/courseMaster/CourseObjectiveForm";
 
 //Syllabus
@@ -245,8 +246,9 @@ import ViewFeeTemplate from "./pages/forms/HostelFeeMaster/ViewFeeTemplate";
 import StudentFeedbackForm from "./pages/forms/studentFeedbackMaster/StudentFeedbackForm";
 
 // TimeTable Master Forms
-
+import TimeTableView from "./pages/forms/timeTableMaster/TimeTableView";
 import BatchAssignmentForm from "./pages/forms/timeTableMaster/BatchAssignmentForm";
+import TableTimeViewMonthWise from "./pages/forms/timeTableMaster/TimeTableViewMonthWise";
 
 //Student Details Master forms
 import ProvisionCertificate from "./pages/forms/studentDetailMaster/ProvisionCertificate";
@@ -275,6 +277,10 @@ import SessionRoomInvigilatorAssignment from "./pages/forms/academicMaster/Sessi
 import ClassCommencementForm from "./pages/forms/academicSectionMaster/ClassCommencementForm";
 import SessionStudentAssignmentIndex from "./containers/indeces/academicMaster/SessionStudentAssignmentIndex";
 import SessionCourseAndDateMappingIndex from "./containers/indeces/academicMaster/SessionCourseAndDateMappingIndex";
+import Courseassignmentindex from "./containers/indeces/CourseMaster/CourseassignmentIndex";
+import TimeTableViewDateWise from "./pages/forms/timeTableMaster/TimeTableViewDateWise";
+import TimeTableViewForCourse from "./pages/forms/timeTableMaster/TimeTableViewForCourse";
+import TimeTableViewWeekWise from "./pages/forms/timeTableMaster/TimeTableViewWeekWise";
 
 function App() {
   const token = JSON.parse(localStorage.getItem("AcharyaErpUser"))?.token;
@@ -1253,10 +1259,9 @@ function App() {
                 />
                 {[
                   "/CourseMaster/Course",
-                  "/CourseMaster/Assignment",
-                  "/CourseMaster/Type",
                   "/CourseMaster/Category",
-                  "/CourseMaster/Student",
+                  "/CourseMaster/Type",
+                  "/CourseMaster/Pattern",
                   "/CourseMaster/CourseObjectives",
                 ].map((path) => (
                   <Route
@@ -1339,6 +1344,11 @@ function App() {
                   exact
                   path="/CoursePatternIndex"
                   element={<CoursePatternIndex />}
+                />
+                <Route
+                  exact
+                  path="/CourseStudentAssignmentIndex"
+                  element={<CourseStudentAssignmentIndex />}
                 />
               </>
               {/*Syllabus Form */}
@@ -1910,6 +1920,11 @@ function App() {
                   path="/TimeTableMaster/batchassignment/Update/:id"
                   element={<BatchAssignmentForm />}
                 />
+                <Route
+                  exact
+                  path="/CourseAssignmentIndex"
+                  element={<Courseassignmentindex />}
+                />
 
                 <Route
                   exact
@@ -1920,6 +1935,32 @@ function App() {
                   exact
                   path="/TimeTableMaster/CourseAssignment/Update/:id"
                   element={<CourseAssignmentForm />}
+                />
+                <Route
+                  exact
+                  path="/TimeTableMaster/TimeTableView"
+                  element={<TimeTableView />}
+                />
+                <Route
+                  exact
+                  path="/TableTimeViewMonthWise/:date"
+                  element={<TableTimeViewMonthWise />}
+                />
+                <Route
+                  exact
+                  path="/TimeTableViewDateWise/:acYearId/:schoolId/:programId/:programSpeId/:yearsemId/:sectionId/:date/:programType"
+                  element={<TimeTableViewDateWise />}
+                />
+                <Route
+                  exact
+                  path="/TimeTableViewForCourse/:acYearId/:schoolId/:programId/:programSpeId/:yearsemId/:sectionId/:date/:courseId/:programType"
+                  element={<TimeTableViewForCourse />}
+                />
+
+                <Route
+                  exact
+                  path="/TimeTableViewWeekWise/:acYearId/:schoolId/:programId/:programSpeId/:yearsemId/:sectionId/:date/:programType"
+                  element={<TimeTableViewWeekWise />}
                 />
               </>
               {/*  StudentTranscriptMaster*/}

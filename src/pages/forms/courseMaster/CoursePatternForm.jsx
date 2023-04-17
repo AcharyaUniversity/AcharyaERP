@@ -50,7 +50,7 @@ function CoursePatternForm() {
     if (pathname.toLowerCase() === "/coursepatternform") {
       setIsNew(true);
       setCrumbs([
-        { name: "Course Master", link: "/CoursePatternIndex" },
+        { name: "Course Master", link: "/CourseMaster/Pattern" },
         { name: "Course Bucket" },
         {
           name: "Create",
@@ -97,7 +97,7 @@ function CoursePatternForm() {
         setSchoolOptions(
           res.data.data.map((obj) => ({
             value: obj.school_id,
-            label: obj.school_name_short,
+            label: obj.school_name,
           }))
         );
       })
@@ -149,7 +149,7 @@ function CoursePatternForm() {
         });
         setCoursePatternId(res.data.data.course_pattern_id);
         setCrumbs([
-          { name: "Course Master", link: "/CoursePatternIndex" },
+          { name: "Course Master", link: "/CourseMaster/Pattern" },
           { name: "Course Bucket" },
           {
             name: "Update",
@@ -207,10 +207,10 @@ function CoursePatternForm() {
         .then((res) => {
           setLoading(false);
           if (res.status === 200 || res.status === 201) {
-            navigate("/CoursePatternIndex", { replace: true });
+            navigate("/CourseMaster/Pattern", { replace: true });
             setAlertMessage({
               severity: "success",
-              message: "Course Bucket Created",
+              message: "Course Pattern Created",
             });
           } else {
             setAlertMessage({
@@ -257,9 +257,9 @@ function CoursePatternForm() {
           if (res.status === 200 || res.status === 201) {
             setAlertMessage({
               severity: "success",
-              message: "Course Bucket Updated",
+              message: "Course Pattern Updated",
             });
-            navigate("/CoursePatternIndex", { replace: true });
+            navigate("/CourseMaster/Pattern", { replace: true });
           } else {
             setAlertMessage({
               severity: "error",
