@@ -52,6 +52,7 @@ function SyllabusIndex() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSyllabusOpen, setModalSyllabusOpen] = useState(false);
   const [syllabus, setSyllabus] = useState([]);
+  const [allRows, setAllRows] = useState([]);
 
   const navigate = useNavigate();
   const classes = useStyles();
@@ -86,11 +87,7 @@ function SyllabusIndex() {
       flex: 1,
       headerName: "Update",
       getActions: (params) => [
-        <IconButton
-          onClick={() =>
-            navigate(`/CourseSubjectiveMaster/Syllabus/Update/${params.row.id}`)
-          }
-        >
+        <IconButton onClick={() => handleUpdate(params)}>
           <EditIcon />
         </IconButton>,
       ],
@@ -130,21 +127,44 @@ function SyllabusIndex() {
         `/api/academic/fetchAllSyllabusDetail?page=${0}&page_size=${100}&sort=created_date`
       )
       .then((res) => {
-        setRows(res.data.data);
+        const filtered = res.data.data.filter((obj, index) => {
+          return (
+            index ===
+            res.data.data.findIndex((o) => obj.course_name === o.course_name)
+          );
+        });
+
+        setAllRows(res.data.data);
+        setRows(filtered);
       })
       .catch((err) => console.error(err));
+  };
+
+  const handleUpdate = (params) => {
+    const allIds = [];
+    allRows.filter((obj) => {
+      if (
+        obj.course_name === params.row.course_name &&
+        obj.course_code === params.row.course_code
+      ) {
+        allIds.push(obj.id);
+      }
+    });
+    navigate(`/CourseSubjectiveMaster/Syllabus/Update/${allIds.toString()}`);
   };
 
   const handleView = (params) => {
     setModalSyllabusOpen(true);
     const temp = [];
-    rows.filter((val) => {
+
+    allRows.filter((val) => {
       if (
         val.course_name === params.row.course_name &&
         val.course_code === params.row.course_code
       ) {
         temp.push(val);
       }
+
       const reversed = [...temp].reverse();
       setSyllabus(reversed);
     });
@@ -219,7 +239,7 @@ function SyllabusIndex() {
           {syllabus.map((obj, i) => {
             return (
               <Grid item xs={12} md={12} key={i}>
-                <Card>
+                <Card elevation={4}>
                   <CardContent>
                     <Grid
                       container

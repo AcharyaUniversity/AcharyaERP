@@ -22,6 +22,7 @@ const initialValues = {
   courseObjective: [
     {
       objective: "",
+      courseOutcomeCode: "",
     },
   ],
 };
@@ -100,6 +101,7 @@ function CourseOutcomeForm() {
           return {
             ...obj,
             [splitName[0]]: e.target.value,
+            ["courseOutcomeCode"]: "CO" + "-" + Number(i + 1),
           };
         return obj;
       }),
@@ -131,7 +133,7 @@ function CourseOutcomeForm() {
       [name]: newValue,
     }));
   };
-  console.log(data);
+
   const add = () => {
     setValues((prev) => ({
       ...prev,
@@ -140,7 +142,7 @@ function CourseOutcomeForm() {
       }),
     }));
   };
-  const remove = (index) => {
+  const remove = () => {
     const temp = values.courseObjective;
     temp.pop();
     setValues((prev) => ({
@@ -192,10 +194,11 @@ function CourseOutcomeForm() {
           course_id: values.courseId,
           active: true,
           course_outcome_objective: obj.objective,
-          course_outcome_code: data.courseCode,
+          course_outcome_code: obj.courseOutcomeCode,
           course_name: data.courseName,
         });
       });
+
       await axios
         .post(`/api/academic/courseOutCome`, temp)
         .then((res) => {
@@ -277,7 +280,7 @@ function CourseOutcomeForm() {
           <Grid item md={4} alignItems="center">
             <CustomAutocomplete
               name="courseId"
-              label="CourseCode-Branch-Year/Sem"
+              label="Course"
               value={values.courseId}
               options={courseOptions}
               handleChangeAdvance={handleChangeAdvance}

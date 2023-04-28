@@ -9,6 +9,7 @@ import CustomTextField from "../../../components/Inputs/CustomTextField";
 import CustomAutocomplete from "../../../components/Inputs/CustomAutocomplete";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
+import e from "express";
 
 const initValues = {
   courseName: "",
@@ -23,6 +24,7 @@ const initialValues = {
   hoursUpdate: "",
   courseObjective: [
     {
+      moduleName: "",
       objective: "",
       hours: "",
     },
@@ -35,6 +37,7 @@ function SyllabusForm() {
   const [isNew, setIsNew] = useState(true);
   const [values, setValues] = useState(initialValues);
   const [data, setData] = useState(initValues);
+  const [updateData, setUpdateData] = useState([]);
   const [courseObjectiveId, setcourseObjectiveId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [courseOptions, setCourseOptions] = useState([]);
@@ -74,17 +77,9 @@ function SyllabusForm() {
     await axios
       .get(`/api/academic/syllabus/${id}`)
       .then((res) => {
-        setData({
-          syllabusId: res.data.data.syllabus_id,
-          syllabusCode: res.data.data.syllabus_code,
-          syllabusPath: res.data.data.syllabus_path,
-          duration: res.data.data.duration,
-        });
-        setValues({
-          courseId: res.data.data.course_id,
-          objectiveUpdate: res.data.data.syllabus_objective,
-          hoursUpdate: res.data.data.duration,
-        });
+        setValues({ courseId: res.data.data[0].course_id });
+        setUpdateData(res.data.data);
+
         setcourseObjectiveId(res.data.data.syllabus_id);
         setCrumbs([
           {
@@ -109,6 +104,7 @@ function SyllabusForm() {
           return {
             ...obj,
             [splitName[0]]: e.target.value,
+            ["moduleName"]: "Module" + "-" + Number(i + 1),
           };
         return obj;
       }),
@@ -153,6 +149,7 @@ function SyllabusForm() {
       [name]: newValue,
     }));
   };
+
   const add = () => {
     setValues((prev) => ({
       ...prev,
@@ -161,7 +158,8 @@ function SyllabusForm() {
       }),
     }));
   };
-  const remove = (index) => {
+
+  const remove = () => {
     const temp = values.courseObjective;
     temp.pop();
     setValues((prev) => ({
@@ -212,6 +210,7 @@ function SyllabusForm() {
         temp.push({
           active: true,
           course_id: values.courseId,
+          module: obj.moduleName,
           duration: obj.hours,
           syllabus_code: data.courseCode,
           syllabus_objective: obj.objective,
@@ -348,7 +347,37 @@ function SyllabusForm() {
             })
           ) : (
             <>
-              <Grid item xs={12} md={8} mt={2.5}>
+              {updateData.map((obj, i) => {
+                return (
+                  <>
+                    <Grid item xs={12} md={8} mt={2.5}>
+                      <CustomTextField
+                        rows={4}
+                        multiline
+                        label={"Module" + "-" + i}
+                        value={obj.syllabus_objective}
+                        handleChange={handleChange}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <CustomTextField
+                        name={"hoursUpdate" + "-" + i}
+                        label="Duration (Hrs)"
+                        value={obj.duration}
+                        handleChangeAdvance={handleChangeAdvance}
+                        inputProps={{
+                          minLength: 2,
+                          maxLength: 2,
+                        }}
+                        required
+                      />
+                    </Grid>
+                  </>
+                );
+              })}
+
+              {/* <Grid item xs={12} md={8} mt={2.5}>
                 <CustomTextField
                   rows={2.5}
                   multiline
@@ -368,9 +397,13 @@ function SyllabusForm() {
                   label="Duration (Hrs)"
                   value={values.hoursUpdate}
                   handleChangeAdvance={handleChangeAdvance}
+                  inputProps={{
+                    minLength: 2,
+                    maxLength: 2,
+                  }}
                   required
                 />
-              </Grid>
+              </Grid> */}
             </>
           )}
           {isNew ? (

@@ -89,6 +89,7 @@ function ReferencebookIndex() {
       `/api/academic/ReferenceBooks?page=${0}&page_size=${10000}&sort=created_date`
     )
       .then((res) => {
+        console.log(res.data.data);
         setRows(res.data.data);
       })
       .catch((err) => console.error(err));
