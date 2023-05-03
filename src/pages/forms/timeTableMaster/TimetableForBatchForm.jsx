@@ -10,7 +10,7 @@ import CustomAutocomplete from "../../../components/Inputs/CustomAutocomplete";
 import CustomDatePicker from "../../../components/Inputs/CustomDatePicker";
 import CustomMultipleAutocomplete from "../../../components/Inputs/CustomMultipleAutocomplete";
 import CustomRadioButtons from "../../../components/Inputs/CustomRadioButtons";
-import EmployeetimetableDetails from "../SectionMaster/EmployeetimetableDetails";
+import EmployeetimetableDetails from "../sectionMaster/EmployeetimetableDetails";
 import { convertDateToString } from "../../../utils/DateTimeUtils";
 
 const initValues = {

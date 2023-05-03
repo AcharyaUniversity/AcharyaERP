@@ -172,7 +172,7 @@ function CourseOutcomeForm() {
       });
       setAlertOpen(true);
     } else {
-      // setLoading(true);
+      setLoading(true);
       const temp = [];
       values.map((obj) => {
         temp.push({

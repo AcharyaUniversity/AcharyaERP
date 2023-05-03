@@ -139,9 +139,9 @@ import TranscriptAssignmentForm from "./pages/forms/transcriptMaster/TranscriptA
 import UniversityForm from "./pages/forms/transcriptMaster/UniversityForm";
 
 // InfrastructureMaster Forms
-import FacilityForm from "./pages/forms/InfrastructureMaster/FacilityForm";
-import BlockForm from "./pages/forms/InfrastructureMaster/BlockForm";
-import RoomForm from "./pages/forms/InfrastructureMaster/RoomForm";
+import FacilityForm from "./pages/forms/infrastructureMaster/FacilityForm";
+import BlockForm from "./pages/forms/infrastructureMaster/BlockForm";
+import RoomForm from "./pages/forms/infrastructureMaster/RoomForm";
 
 //Feetemplate Master
 import FeeTemplate from "./pages/forms/feetemplateMaster/FeeTemplate";
@@ -156,45 +156,45 @@ import FeetemplateSubAmountHistory from "./pages/forms/feetemplateMaster/Feetemp
 import CourseForm from "./pages/forms/courseMaster/CourseForm";
 import CourseAssignment from "./pages/forms/courseMaster/CourseAssignment";
 import CoursePatternForm from "./pages/forms/courseMaster/CoursePatternForm";
-import CoursePatternIndex from "./containers/indeces/CourseMaster/CoursePatternIndex";
+import CoursePatternIndex from "./containers/indeces/courseMaster/CoursePatternIndex";
 import CourseTypeForm from "./pages/forms/courseMaster/CourseTypeForm";
 import CourseCategoryForm from "./pages/forms/courseMaster/CourseCategoryForm";
 import CourseStudentAssignment from "./pages/forms/courseMaster/CourseStudentAssignment";
-import CourseStudentAssignmentIndex from "./containers/indeces/CourseMaster/CourseStudentAssignmentIndex";
-import CourseassignmentIndex from "./containers/indeces/CourseMaster/CourseassignmentIndex";
+import CourseStudentAssignmentIndex from "./containers/indeces/courseMaster/CourseStudentAssignmentIndex";
+import CourseassignmentIndex from "./containers/indeces/courseMaster/CourseassignmentIndex";
 
 // CategoryType Master Forms
-import CategoryTypeForm from "./pages/forms/CategoryTypeMaster/CategoryTypeForm";
-import CategoryDetailsForm from "./pages/forms/CategoryTypeMaster/CategoryDetailsForm";
-import CommencementTypeForm from "./pages/forms/CategoryTypeMaster/CommencementTypeForm";
+import CategoryTypeForm from "./pages/forms/categoryTypeMaster/CategoryTypeForm";
+import CategoryDetailsForm from "./pages/forms/categoryTypeMaster/CategoryDetailsForm";
+import CommencementTypeForm from "./pages/forms/categoryTypeMaster/CommencementTypeForm";
 
 //LeaveMaster Forms
-import LeaveTypeForm from "./pages/forms/LeaveMaster/LeaveTypeForm";
-import ViewLeavePDF from "./pages/forms/LeaveMaster/ViewLeavePDF";
+import LeaveTypeForm from "./pages/forms/leaveMaster/LeaveTypeForm";
+import ViewLeavePDF from "./pages/forms/leaveMaster/ViewLeavePDF";
 
 // HolidayCalenderMaster Forms
-import HolidayCalenderForm from "./pages/forms/HolidayCalenderMaster/HolidayCalenderForm";
-import DeAssignDepartment from "./pages/forms/HolidayCalenderMaster/DeAssignDepartment";
+import HolidayCalenderForm from "./pages/forms/holidayCalenderMaster/HolidayCalenderForm";
+import DeAssignDepartment from "./pages/forms/holidayCalenderMaster/DeAssignDepartment";
 
 //LeavePattern Master Forms
-import LeavePatternForm from "./pages/forms/LeavePatternMaster/LeavePatternForm";
-import ViewReport from "./pages/forms/LeavePatternMaster/ViewReport";
+import LeavePatternForm from "./pages/forms/leavePatternMaster/LeavePatternForm";
+import ViewReport from "./pages/forms/leavePatternMaster/ViewReport";
 
 // HostelMaster Forms
-import DoctorWardenForm from "./pages/forms/HostelMaster/DoctorWardenForm";
-import HostelBlockForm from "./pages/forms/HostelMaster/HostelBlockForm";
-import RoomTypeForm from "./pages/forms/HostelMaster/RoomTypeForm";
-import HostelRoomForm from "./pages/forms/HostelMaster/HostelRoomForm";
-import StandardAccessoriesForm from "./pages/forms/HostelMaster/StandardAccessoriesForm";
+import DoctorWardenForm from "./pages/forms/hostelMaster/DoctorWardenForm";
+import HostelBlockForm from "./pages/forms/hostelMaster/HostelBlockForm";
+import RoomTypeForm from "./pages/forms/hostelMaster/RoomTypeForm";
+import HostelRoomForm from "./pages/forms/hostelMaster/HostelRoomForm";
+import StandardAccessoriesForm from "./pages/forms/hostelMaster/StandardAccessoriesForm";
 
 // Section Master forms
-import SectionForm from "./pages/forms/SectionMaster/SectionForm";
-import BatchForm from "./pages/forms/SectionMaster/BatchForm";
-import SectionAssignmentForm from "./pages/forms/SectionMaster/SectionAssignmentForm";
-import StudentPromote from "./pages/forms/SectionMaster/StudentPromote";
-import TimeSlotsForm from "./pages/forms/SectionMaster/TimeSlotsForm";
+import SectionForm from "./pages/forms/sectionMaster/SectionForm";
+import BatchForm from "./pages/forms/sectionMaster/BatchForm";
+import SectionAssignmentForm from "./pages/forms/sectionMaster/SectionAssignmentForm";
+import StudentPromote from "./pages/forms/sectionMaster/StudentPromote";
+import TimeSlotsForm from "./pages/forms/sectionMaster/TimeSlotsForm";
 import CourseAssignmentForm from "./pages/forms/timeTableMaster/CourseAssignmentForm";
-import TimeIntervalTypesForm from "./pages/forms/SectionMaster/TimeIntervalTypesForm";
+import TimeIntervalTypesForm from "./pages/forms/sectionMaster/TimeIntervalTypesForm";
 import TimetableForSectionForm from "./pages/forms/timeTableMaster/TimetableForSectionForm";
 import TimetableForBatchForm from "./pages/forms/timeTableMaster/TimetableForBatchForm";
 
@@ -236,8 +236,8 @@ import ScholarshipApproverForm from "./pages/forms/candidateWalkin/ScholarshipAp
 import ScholarshipApproverIndex from "./pages/indeces/ScholarshipApproverIndex";
 
 // HostelFee Master Forms
-import HostelFeeForm from "./pages/forms/HostelFeeMaster/HostelFeeForm";
-import ViewFeeTemplate from "./pages/forms/HostelFeeMaster/ViewFeeTemplate";
+import HostelFeeForm from "./pages/forms/hostelFeeMaster/HostelFeeForm";
+import ViewFeeTemplate from "./pages/forms/hostelFeeMaster/ViewFeeTemplate";
 
 // Student Feedback Master Forms
 import StudentFeedbackForm from "./pages/forms/studentFeedbackMaster/StudentFeedbackForm";
@@ -1292,13 +1292,11 @@ function App() {
                   path="/CourseAssignment/Update/:id"
                   element={<CourseAssignment />}
                 />
-
                 <Route
                   exact
                   path="/CourseForm/Update/:id"
                   element={<CourseForm />}
                 />
-
                 <Route
                   exact
                   path="/CourseTypeForm/New"
@@ -1329,7 +1327,6 @@ function App() {
                   path="/CourseMaster/Student/Update/:id"
                   element={<CourseStudentAssignment />}
                 />
-
                 <Route
                   exact
                   path="/CoursePatternForm"
@@ -1340,6 +1337,7 @@ function App() {
                   path="/CoursePatternForm/Update/:id"
                   element={<CoursePatternForm />}
                 />
+
                 <Route
                   exact
                   path="/CoursePatternIndex"
@@ -1950,7 +1948,6 @@ function App() {
                   path="/TimeTableMaster/timeslots/Update/:id"
                   element={<TimeSlotsForm />}
                 />
-
                 <Route
                   exact
                   path="/TimeTableMaster/batchassignment/New"

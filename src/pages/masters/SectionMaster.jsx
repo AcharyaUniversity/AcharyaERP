@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Tabs, Tab } from "@mui/material";
-import SectionIndex from "../../containers/indeces/SectionMaster/SectionIndex";
-import BatchIndex from "../../containers/indeces/SectionMaster/BatchIndex";
+import SectionIndex from "../../containers/indeces/sectionMaster/SectionIndex";
+import BatchIndex from "../../containers/indeces/sectionMaster/BatchIndex";
 import TimeSlotsIndex from "../../containers/indeces/timeTableMaster/TimeSlotsIndex";
-import TimeIntervalTypesIndex from "../../containers/indeces/SectionMaster/TimeIntervalTypesIndex";
+import TimeIntervalTypesIndex from "../../containers/indeces/sectionMaster/TimeIntervalTypesIndex";
 import InternalTypeIndex from "../../containers/indeces/academicMaster/InternalTypeIndex";
 import useBreadcrumbs from "../../hooks/useBreadcrumbs";
 import { useNavigate, useLocation } from "react-router-dom";
