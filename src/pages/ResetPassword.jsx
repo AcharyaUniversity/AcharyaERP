@@ -3,7 +3,7 @@ import { makeStyles } from "@mui/styles";
 import { Box, Grid, Button, CircularProgress } from "@mui/material";
 import CustomTextField from "../components/Inputs/CustomTextField";
 import CustomModal from "../components/CustomModal";
-import axios from "../services/Api";
+import axios from "../services/ApiWithoutToken";
 import { useSearchParams } from "react-router-dom";
 import useAlert from "../hooks/useAlert";
 
@@ -25,11 +25,15 @@ const styles = makeStyles(() => ({
   },
 }));
 
+const initialValues = { password: "" };
+
+const requiredFields = ["password"];
+
 function ResetPassword() {
   let [searchParams] = useSearchParams();
   const classes = styles();
   const token = searchParams.get("token");
-  const [storedata, setStoredata] = useState({ password: "" });
+  const [storedata, setStoredata] = useState(initialValues);
 
   const [show, setShow] = useState(false);
   const [modalContent, setModalContent] = useState({
@@ -41,9 +45,19 @@ function ResetPassword() {
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [formValid, setFormValid] = useState({
-    password: false,
-  });
+  const checks = {
+    password: [
+      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,12}$/.test(
+        storedata.password
+      ),
+    ],
+  };
+
+  const errorMessages = {
+    password: [
+      "Password must be 8 to 20 character string with at least one upper case letter, one lower case letter, one digit and one special character @ # $ %",
+    ],
+  };
 
   function page() {
     handleModalOpen("discard");
@@ -72,9 +86,26 @@ function ResetPassword() {
     }
   };
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    if (Object.values(formValid).includes(false)) {
+  const requiredFieldsValid = () => {
+    for (let i = 0; i < requiredFields.length; i++) {
+      const field = requiredFields[i];
+      if (Object.keys(checks).includes(field)) {
+        const ch = checks[field];
+        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
+      } else if (!storedata[field]) return false;
+    }
+    return true;
+  };
+
+  console.log(storedata.password);
+
+  const onSubmit = async () => {
+    if (!requiredFieldsValid()) {
+      setAlertMessage({
+        severity: "error",
+        message: "Please fill required fields",
+      });
+
       setAlertOpen(true);
     } else {
       const temp = {};
@@ -93,7 +124,12 @@ function ResetPassword() {
         )
         .then((res) => {
           setLoading(true);
-          setAlertMessage({ severity: "success", message: res.data });
+          setAlertMessage([
+            {
+              severity: "success",
+              message: "Successfull",
+            },
+          ]);
           page();
         })
         .catch((error) => {
@@ -154,15 +190,8 @@ function ResetPassword() {
                   value={storedata.password}
                   handleChange={handleChange}
                   fullWidth
-                  errors={[
-                    "Password must be 8 to 20 character string with at least one upper case letter, one lower case letter, one digit and one special character @ # $ %",
-                  ]}
-                  checks={[
-                    /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,12}$/.test(
-                      storedata.password
-                    ),
-                  ]}
-                  setFormValid={setFormValid}
+                  errors={errorMessages.password}
+                  checks={checks.password}
                   required
                 />
               </Grid>

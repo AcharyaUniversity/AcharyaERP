@@ -2272,7 +2272,6 @@ function FeetemplateSubamount() {
               style={{ borderRadius: 7 }}
               variant="contained"
               color="primary"
-              // disabled={loading}
               onClick={isNew ? handleCreate : handleUpdate}
             >
               <strong>{isNew ? "Create" : "Update"}</strong>

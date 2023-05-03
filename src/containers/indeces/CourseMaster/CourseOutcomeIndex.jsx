@@ -8,7 +8,6 @@ import {
   tableCellClasses,
   TableCell,
   TableHead,
-  TableRow,
 } from "@mui/material";
 import GridIndex from "../../../components/GridIndex";
 import { Check, HighlightOff } from "@mui/icons-material";
@@ -19,10 +18,10 @@ import CustomModal from "../../../components/CustomModal";
 import axios from "../../../services/Api";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import ModalWrapper from "../../../components/ModalWrapper";
+import { makeStyles } from "@mui/styles";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -31,6 +30,15 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
+  },
+}));
+
+const useStyles = makeStyles((theme) => ({
+  bg: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.headerWhite.main,
+    textAlign: "center",
+    padding: "5px",
   },
 }));
 
@@ -44,8 +52,11 @@ function CourseOutcomeIndex() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalOutcomeOpen, setModalOutcomeOpen] = useState(false);
   const [courseOutcome, setCourseOutcome] = useState([]);
+  const [allRows, setAllRows] = useState([]);
+  const [courseCode, setCourseCode] = useState("");
 
   const navigate = useNavigate();
+  const classes = useStyles();
 
   const columns = [
     { field: "course_name", headerName: "Course", flex: 1 },
@@ -82,13 +93,7 @@ function CourseOutcomeIndex() {
       flex: 1,
       headerName: "Update",
       getActions: (params) => [
-        <IconButton
-          onClick={() =>
-            navigate(
-              `/CourseSubjectiveMaster/CourseOutcome/Update/${params.row.id}`
-            )
-          }
-        >
+        <IconButton onClick={() => handleUpdate(params)}>
           <EditIcon />
         </IconButton>,
       ],
@@ -128,22 +133,46 @@ function CourseOutcomeIndex() {
         `/api/academic/fetchAllCourseOutComeDetail?page=${0}&page_size=${100}&sort=created_date`
       )
       .then((res) => {
-        setRows(res.data.data.Paginated_data.content);
+        setAllRows(res.data.data.Paginated_data.content);
+        const filtered = res.data.data.Paginated_data.content.filter(
+          (obj, i) => {
+            return (
+              i ===
+              res.data.data.Paginated_data.content.findIndex(
+                (item) => item.course_id === obj.course_id
+              )
+            );
+          }
+        );
+
+        setRows(filtered);
       })
       .catch((err) => console.error(err));
+  };
+
+  const handleUpdate = (params) => {
+    const allIds = [];
+    allRows.filter((obj) => {
+      if (obj.course_name === params.row.course_name) {
+        allIds.push(obj.id);
+      }
+    });
+    navigate(
+      `/CourseSubjectiveMaster/CourseOutcome/Update/${allIds.toString()}`
+    );
   };
 
   const handleView = (params) => {
     setModalOutcomeOpen(true);
     const temp = [];
-    rows.filter((val) => {
-      if (
-        val.course_name === params.row.course_name &&
-        val.course_outcome_code === params.row.course_outcome_code
-      ) {
+
+    allRows.filter((val) => {
+      if (val.course_name === params.row.course_name) {
         temp.push(val);
+        setCourseCode(val.course_code);
       }
-      setCourseOutcome(temp);
+      const reversed = [...temp].reverse();
+      setCourseOutcome(reversed);
     });
   };
 
@@ -206,42 +235,40 @@ function CourseOutcomeIndex() {
         open={modalOutcomeOpen}
         setOpen={setModalOutcomeOpen}
       >
-        <Card
-          sx={{ minWidth: 450, minHeight: 200, marginTop: 4 }}
-          elevation={4}
-        >
-          <TableHead>
-            <StyledTableCell
-              sx={{
-                width: 500,
-                textAlign: "center",
-                fontSize: 18,
-                padding: "10px",
-              }}
-            >
-              Course Outcome
-            </StyledTableCell>
-          </TableHead>
-          <CardContent>
-            <Typography sx={{ fontSize: 16, paddingLeft: 1 }}>
-              {courseOutcome.map((val, i) => (
-                <ul>
-                  <li>
-                    <Typography
-                      variant="h6"
-                      color="inherit"
-                      component="div"
-                      mt={2}
-                    >
-                      {"CO" + Number(i + 1)}
-                    </Typography>
-                    {val.course_outcome_objective}
-                  </li>
-                </ul>
-              ))}
+        <Grid container rowSpacing={2} columnSpacing={2}>
+          <Grid item xs={12} mt={2}>
+            <Typography variant="subtitle2" className={classes.bg}>
+              Outcome - {courseCode}
             </Typography>
-          </CardContent>
-        </Card>
+          </Grid>
+          {courseOutcome.map((obj, i) => {
+            return (
+              <Grid item xs={12} md={12} key={i}>
+                <Card elevation={4}>
+                  <CardContent>
+                    <Grid
+                      container
+                      justifyContent="flex-start"
+                      rowSpacing={0.5}
+                      columnSpacing={2}
+                    >
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2">
+                          {"CO" + Number(i + 1)}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="body2">
+                          {obj.course_outcome_objective}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
+        </Grid>
       </ModalWrapper>
       <Box sx={{ position: "relative", mt: 2 }}>
         <Button

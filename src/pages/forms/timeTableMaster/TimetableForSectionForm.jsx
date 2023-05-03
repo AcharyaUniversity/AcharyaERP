@@ -165,7 +165,13 @@ function TimetableForSectionForm() {
   useEffect(() => {
     getRoomData();
     getAllEmployees();
-  }, [values.fromDate, values.toDate, values.weekDay, values.timeSlotId]);
+  }, [
+    values.fromDate,
+    values.toDate,
+    values.weekDay,
+    values.timeSlotId,
+    values.selectedWeekDay,
+  ]);
 
   const getSchoolNameOptions = async () => {
     await axios
@@ -281,13 +287,13 @@ function TimetableForSectionForm() {
   };
 
   const getRoomData = async () => {
-    if (values.fromDate && values.toDate && values.weekDay && values.timeSlotId)
+    if (values.fromDate && values.toDate && values.timeSlotId)
       await axios
         .get(
           `/api/getAllActiveRoomsForTimeTableBsn/${
             values.timeSlotId
           }/${values.fromDate.toISOString()}/${values.toDate.toISOString()}/${
-            values.weekDay
+            values.weekDay ? values.weekDay : values.selectedWeekDay
           }`
         )
         .then((res) => {
@@ -302,12 +308,12 @@ function TimetableForSectionForm() {
   };
 
   const getAllEmployees = async () => {
-    if (values.fromDate && values.toDate && values.weekDay && values.timeSlotId)
+    if (values.fromDate && values.toDate && values.timeSlotId)
       await axios
         .get(
           `/api/academic/getAllEmployeesForTimeTable/${values.fromDate.toISOString()}/${values.toDate.toISOString()}/${
             values.timeSlotId
-          }/${values.weekDay}`
+          }/${values.weekDay ? values.weekDay : values.selectedWeekDay}`
         )
         .then((res) => {
           setEmployeeOptions(

@@ -31,8 +31,8 @@ function CourseSubjectiveMaster() {
   return (
     <>
       <Tabs value={tab} onChange={handleChange}>
-        <Tab value="Objective" label="Course Objective" />
-        <Tab value="Outcome" label="Course Outcome" />
+        <Tab value="Objective" label=" Objective" />
+        <Tab value="Outcome" label=" Outcome" />
         <Tab value="Syllabus" label="Syllabus" />
       </Tabs>
       {tab === "Objective" && <CourseObjectiveIndex />}

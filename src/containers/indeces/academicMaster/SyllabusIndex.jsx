@@ -6,7 +6,6 @@ import {
   styled,
   tableCellClasses,
   TableCell,
-  TableHead,
   Grid,
 } from "@mui/material";
 import GridIndex from "../../../components/GridIndex";
@@ -53,6 +52,7 @@ function SyllabusIndex() {
   const [modalSyllabusOpen, setModalSyllabusOpen] = useState(false);
   const [syllabus, setSyllabus] = useState([]);
   const [allRows, setAllRows] = useState([]);
+  const [courseCode, setCourseCode] = useState(null);
 
   const navigate = useNavigate();
   const classes = useStyles();
@@ -163,6 +163,7 @@ function SyllabusIndex() {
         val.course_code === params.row.course_code
       ) {
         temp.push(val);
+        setCourseCode(val.course_code);
       }
 
       const reversed = [...temp].reverse();
@@ -233,7 +234,7 @@ function SyllabusIndex() {
         <Grid container rowSpacing={2} columnSpacing={2}>
           <Grid item xs={12} mt={2}>
             <Typography variant="subtitle2" className={classes.bg}>
-              Syllabus
+              Syllabus - {courseCode}
             </Typography>
           </Grid>
           {syllabus.map((obj, i) => {
@@ -249,7 +250,15 @@ function SyllabusIndex() {
                     >
                       <Grid item xs={12}>
                         <Typography variant="subtitle2">
-                          {"Module" + Number(i + 1)}{" "}
+                          {"Module" +
+                            " " +
+                            Number(i + 1) +
+                            " " +
+                            "-" +
+                            " " +
+                            `${obj.duration}` +
+                            " " +
+                            "hrs"}
                         </Typography>
                       </Grid>
                       <Grid item xs={12}>

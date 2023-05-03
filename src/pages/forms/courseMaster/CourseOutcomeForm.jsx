@@ -11,31 +11,26 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 
 const initValues = {
+  courseId: null,
   courseName: "",
   courseCode: "",
 };
+
 const initialValues = {
-  courseId: null,
-  courseNameUpdate: "",
-  courseCodeUpdate: "",
-  outcomeUpdate: "",
-  courseObjective: [
-    {
-      objective: "",
-      courseOutcomeCode: "",
-    },
-  ],
+  courseOutcomeId: null,
+  courseOutcomeObjective: "",
+  courseOutcomeCode: "",
 };
 
 const requiredFields = [];
 
 function CourseOutcomeForm() {
   const [isNew, setIsNew] = useState(true);
-  const [values, setValues] = useState(initialValues);
   const [data, setData] = useState(initValues);
-  const [courseOutcomeId, setcourseOutcomeId] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [values, setValues] = useState([initialValues]);
   const [courseOptions, setCourseOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [courseObjectiveCount, setCourseObjectiveCount] = useState(null);
 
   const { setAlertMessage, setAlertOpen } = useAlert();
   const setCrumbs = useBreadcrumbs();
@@ -44,6 +39,7 @@ function CourseOutcomeForm() {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    getCourseData();
     if (
       pathname.toLowerCase() === "/coursesubjectivemaster/courseoutcome/new"
     ) {
@@ -58,29 +54,43 @@ function CourseOutcomeForm() {
       ]);
     } else {
       setIsNew(false);
-      getCourseObjectiveData();
+      getCourseOutcomeData();
     }
   }, [pathname]);
 
-  const checks = {
-    courseObjective: [values.courseObjective !== ""],
-  };
+  const checks = {};
 
-  const errorMessages = {
-    courseObjective: ["This field required"],
-  };
+  const errorMessages = {};
 
-  const getCourseObjectiveData = async () => {
+  const getCourseData = async () => {
     await axios
-      .get(`/api/academic/courseOutCome/${id}`)
+      .get(`/api/academic/getCoursesConcateWithCodeNameAndYearSem`)
       .then((res) => {
-        setValues({
-          courseId: res.data.data.course_id,
-          courseCodeUpdate: res.data.data.course_outcome_code,
-          courseNameUpdate: res.data.data.course_name,
-          outcomeUpdate: res.data.data.course_outcome_objective,
-        });
-        setcourseOutcomeId(res.data.data.course_outcome_id);
+        setCourseOptions(
+          res.data.data.map((obj) => ({
+            value: obj.course_id,
+            label: obj.course,
+          }))
+        );
+      })
+      .catch((error) => console.error(error));
+  };
+
+  const getCourseOutcomeData = async () => {
+    await axios
+      .get(`/api/academic/listOfcourseOutCome/${id}`)
+      .then((res) => {
+        setData({ courseId: res.data.data[0].course_id });
+        const updatedData = [];
+        for (let i = 0; i < res.data.data.length; i++) {
+          updatedData.push({
+            courseOutcomeId: res.data.data[i].course_outcome_id,
+            courseOutcomeObjective: res.data.data[i].course_outcome_objective,
+            courseOutcomeCode: res.data.data[i].course_outcome_code,
+          });
+        }
+
+        setValues(updatedData);
         setCrumbs([
           { name: "CourseMaster", link: "/CourseSubjectiveMaster/Outcome" },
           { name: "Course Outcome" },
@@ -93,26 +103,18 @@ function CourseOutcomeForm() {
 
   const handleChange = (e) => {
     const splitName = e.target.name.split("-");
-
-    setValues((prev) => ({
-      ...prev,
-      courseObjective: prev.courseObjective.map((obj, i) => {
-        if (i === parseInt(splitName[1]))
+    setValues((prev) =>
+      prev.map((obj, i) => {
+        if (i === Number(splitName[1]))
           return {
             ...obj,
             [splitName[0]]: e.target.value,
-            ["courseOutcomeCode"]: "CO" + "-" + Number(i + 1),
+            ["courseOutcomeCode"]:
+              "CO" + "-" + Number(courseObjectiveCount + i + 1),
           };
         return obj;
-      }),
-    }));
-  };
-
-  const handleChangeOne = (e) => {
-    setValues((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+      })
+    );
   };
 
   const handleChangeAdvance = async (name, newValue) => {
@@ -127,28 +129,28 @@ function CourseOutcomeForm() {
               data.courseCode = filteredItem.course_code;
             });
         });
+
+      await axios
+        .get(`/api/academic/getCountOfOutcome/${newValue}`)
+        .then((res) => {
+          setCourseObjectiveCount(res.data.data);
+        })
+        .catch((error) => console.error(error));
     }
-    setValues((prev) => ({
+    setData((prev) => ({
       ...prev,
       [name]: newValue,
     }));
   };
 
-  const add = () => {
-    setValues((prev) => ({
-      ...prev,
-      ["courseObjective"]: prev["courseObjective"].concat({
-        objective: "",
-      }),
-    }));
+  const addRow = () => {
+    setValues((prev) => [...prev, initialValues]);
   };
-  const remove = () => {
-    const temp = values.courseObjective;
-    temp.pop();
-    setValues((prev) => ({
-      ...prev,
-      ["courseObjective"]: temp,
-    }));
+
+  const deleteRow = () => {
+    const filtered = [...values];
+    filtered.pop();
+    setValues(filtered);
   };
 
   const requiredFieldsValid = () => {
@@ -161,23 +163,6 @@ function CourseOutcomeForm() {
     }
     return true;
   };
-  useEffect(() => {
-    getCourse();
-  }, [values.courseId]);
-
-  const getCourse = async () => {
-    await axios
-      .get(`/api/academic/getCoursesConcateWithCodeNameAndYearSem`)
-      .then((res) => {
-        setCourseOptions(
-          res.data.data.map((obj) => ({
-            value: obj.course_id,
-            label: obj.course,
-          }))
-        );
-      })
-      .catch((error) => console.error(error));
-  };
 
   const handleCreate = async () => {
     if (!requiredFieldsValid()) {
@@ -187,15 +172,15 @@ function CourseOutcomeForm() {
       });
       setAlertOpen(true);
     } else {
-      setLoading(true);
+      // setLoading(true);
       const temp = [];
-      values.courseObjective.forEach((obj) => {
+      values.map((obj) => {
         temp.push({
-          course_id: values.courseId,
           active: true,
-          course_outcome_objective: obj.objective,
+          course_outcome_objective: obj.courseOutcomeObjective,
           course_outcome_code: obj.courseOutcomeCode,
           course_name: data.courseName,
+          course_id: data.courseId,
         });
       });
 
@@ -227,6 +212,7 @@ function CourseOutcomeForm() {
         });
     }
   };
+
   const handleUpdate = async () => {
     if (!requiredFieldsValid()) {
       setAlertMessage({
@@ -236,137 +222,162 @@ function CourseOutcomeForm() {
       setAlertOpen(true);
     } else {
       setLoading(true);
-      const temp = {};
-      temp.active = true;
-      temp.course_outcome_id = courseOutcomeId;
-      temp.course_id = values.courseId;
-      temp.course_outcome_objective = values.outcomeUpdate;
-      temp.course_name = values.courseNameUpdate;
-      temp.course_outcome_code = values.courseCodeUpdate;
+      const temp = [];
+      values.map((obj) => {
+        temp.push({
+          active: true,
+          course_outcome_code: obj.courseOutcomeCode,
+          course_outcome_objective: obj.courseOutcomeObjective,
+          course_outcome_id: obj.courseOutcomeId,
+          course_name: data.courseName,
+          course_id: data.courseId,
+        });
+      });
 
       await axios
-        .put(`/api/academic/courseOutComes/${id}`, temp)
+        .put(`/api/academic/outcome/${id}`, temp)
         .then((res) => {
-          if (res.status === 200 || res.status === 201) {
-            setAlertMessage({
-              severity: "success",
-              message: "Form Updated Successfully",
-            });
-            navigate("/CourseSubjectiveMaster/Outcome", { replace: true });
-          } else {
-            setLoading(false);
-            setAlertMessage({
-              severity: "error",
-              message: res.data.message,
-            });
-          }
+          setLoading(false);
+          setAlertMessage({
+            severity: "success",
+            message: res.data.message,
+          });
           setAlertOpen(true);
+          setAlertMessage({
+            severity: "success",
+            message: "Form Updated Successfully",
+          });
+          navigate("/CourseSubjectiveMaster/Outcome", { replace: true });
         })
-        .catch((error) => {
+        .catch((err) => {
           setLoading(false);
           setAlertMessage({
             severity: "error",
-            message: error.response ? error.response.data.message : "Error",
+            message: err.response.data
+              ? err.response.data.message
+              : "Error submitting",
           });
           setAlertOpen(true);
+          console.error(err);
         });
     }
   };
 
   return (
-    <Box component="form" overflow="hidden" p={1}>
-      <FormWrapper>
-        <Grid container alignItems="center" justifyContent="flex-start">
-          <Grid item md={4} alignItems="center">
-            <CustomAutocomplete
-              name="courseId"
-              label="Course"
-              value={values.courseId}
-              options={courseOptions}
-              handleChangeAdvance={handleChangeAdvance}
-              disabled={!isNew}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={1}></Grid>
-          {isNew ? (
-            values.courseObjective.map((obj, i) => {
-              return (
-                <>
-                  <Grid item xs={12} md={8} mt={2.5}>
-                    <CustomTextField
-                      rows={2}
-                      multiline
-                      inputProps={{
-                        minLength: 1,
-                        maxLength: 500,
-                      }}
-                      label={"C0" + Number(i + 1)}
-                      name={"objective" + "-" + i}
-                      value={values.courseObjective[i]["objective"]}
-                      handleChange={handleChange}
-                    />
-                  </Grid>
-                </>
-              );
-            })
-          ) : (
-            <Grid item xs={12} md={6}>
-              <CustomTextField
-                rows={2}
-                multiline
-                inputProps={{
-                  minLength: 1,
-                  maxLength: 500,
-                }}
-                label="Outcome"
-                name={"outcomeUpdate"}
-                value={values.outcomeUpdate}
-                handleChange={handleChangeOne}
+    <>
+      <Box component="form" overflow="hidden" p={1}>
+        <FormWrapper>
+          <Grid
+            container
+            alignItems="center"
+            justifyContent="flex-start"
+            rowSpacing={4}
+            columnSpacing={{ xs: 2, md: 4 }}
+          >
+            <Grid item xs={12} md={4}>
+              <CustomAutocomplete
+                name="courseId"
+                label="Course"
+                value={data.courseId}
+                options={courseOptions}
+                handleChangeAdvance={handleChangeAdvance}
+                disabled={!isNew}
+                required
               />
             </Grid>
-          )}
-          {isNew ? (
-            <Grid item xs={12} align="right">
-              <Button
-                variant="contained"
-                color="error"
-                onClick={remove}
-                disabled={values.courseObjective.length === 1}
-                style={{ marginRight: "10px" }}
-              >
-                <RemoveIcon />
-              </Button>
-
-              <Button variant="contained" color="success" onClick={add}>
-                <AddIcon />
-              </Button>
-            </Grid>
-          ) : (
-            <></>
-          )}
-          <Grid item xs={12} textAlign="right" mt={3}>
-            <Button
-              style={{ borderRadius: 7 }}
-              variant="contained"
-              color="primary"
-              disabled={loading}
-              onClick={isNew ? handleCreate : handleUpdate}
-            >
-              {loading ? (
-                <CircularProgress
-                  size={25}
-                  color="blue"
-                  style={{ margin: "2px 13px" }}
-                />
-              ) : (
-                <strong>{isNew ? "Create" : "Update"}</strong>
-              )}
-            </Button>
           </Grid>
-        </Grid>
-      </FormWrapper>
-    </Box>
+          <Grid
+            container
+            justifyContent="flex-start"
+            alignItems="center"
+            rowSpacing={4}
+            columnSpacing={{ xs: 2, md: 4 }}
+          >
+            {values.map((obj, i) => {
+              return (
+                <Grid item xs={12} md={8} mt={2} key={i}>
+                  <CustomTextField
+                    rows={2.8}
+                    multiline
+                    name={"courseOutcomeObjective" + "-" + i}
+                    label={"CO" + "-" + Number(courseObjectiveCount + i + 1)}
+                    value={obj.courseOutcomeObjective}
+                    handleChange={handleChange}
+                    required
+                  />
+                </Grid>
+              );
+            })}
+          </Grid>
+          <Grid container rowSpacing={5} justifyContent="flex-end">
+            {isNew ? (
+              <>
+                <Grid item xs={12} textAlign="right">
+                  <Button
+                    variant="contained"
+                    color="success"
+                    sx={{
+                      borderRadius: 2,
+                      marginRight: "10px",
+                    }}
+                    onClick={addRow}
+                  >
+                    <AddIcon />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    sx={{
+                      borderRadius: 2,
+                    }}
+                    onClick={deleteRow}
+                  >
+                    <RemoveIcon />
+                  </Button>
+                </Grid>
+                <Grid item xs={12} textAlign="right">
+                  <Button
+                    style={{ borderRadius: 7 }}
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCreate}
+                  >
+                    {loading ? (
+                      <CircularProgress
+                        size={25}
+                        color="blue"
+                        style={{ margin: "2px 13px" }}
+                      />
+                    ) : (
+                      <strong>{"Create"}</strong>
+                    )}
+                  </Button>
+                </Grid>
+              </>
+            ) : (
+              <Grid item xs={12} textAlign="right">
+                <Button
+                  style={{ borderRadius: 7 }}
+                  variant="contained"
+                  color="primary"
+                  onClick={handleUpdate}
+                >
+                  {loading ? (
+                    <CircularProgress
+                      size={25}
+                      color="blue"
+                      style={{ margin: "2px 13px" }}
+                    />
+                  ) : (
+                    <strong>{"Update"}</strong>
+                  )}
+                </Button>
+              </Grid>
+            )}
+          </Grid>
+        </FormWrapper>
+      </Box>
+    </>
   );
 }
 

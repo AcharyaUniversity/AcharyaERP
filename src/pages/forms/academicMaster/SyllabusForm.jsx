@@ -1,46 +1,31 @@
 import { useState, useEffect } from "react";
-import { Box, Grid, Button, CircularProgress } from "@mui/material";
+import { Box, Grid, Button, CircularProgress, duration } from "@mui/material";
 import FormWrapper from "../../../components/FormWrapper";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import CustomTextField from "../../../components/Inputs/CustomTextField";
 import useAlert from "../../../hooks/useAlert";
 import useBreadcrumbs from "../../../hooks/useBreadcrumbs";
 import axios from "../../../services/Api";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import CustomTextField from "../../../components/Inputs/CustomTextField";
 import CustomAutocomplete from "../../../components/Inputs/CustomAutocomplete";
-import RemoveIcon from "@mui/icons-material/Remove";
-import AddIcon from "@mui/icons-material/Add";
-import e from "express";
 
-const initValues = {
-  courseName: "",
-  syllabusCode: "",
-  programSpeId: "",
-  syllabusId: "",
-  duration: "",
-};
 const initialValues = {
-  courseId: null,
-  objectiveUpdate: "",
-  hoursUpdate: "",
-  courseObjective: [
-    {
-      moduleName: "",
-      objective: "",
-      hours: "",
-    },
-  ],
+  objective: "",
+  duration: "",
+  moduleName: "",
+  syllbusId: null,
 };
 
 const requiredFields = [];
 
 function SyllabusForm() {
-  const [isNew, setIsNew] = useState(true);
-  const [values, setValues] = useState(initialValues);
-  const [data, setData] = useState(initValues);
-  const [updateData, setUpdateData] = useState([]);
-  const [courseObjectiveId, setcourseObjectiveId] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [isNew, setIsNew] = useState(false);
+  const [values, setValues] = useState([initialValues]);
+  const [data, setData] = useState({ courseId: null });
   const [courseOptions, setCourseOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [moduleCount, setModuleCount] = useState(null);
 
   const { setAlertMessage, setAlertOpen } = useAlert();
   const setCrumbs = useBreadcrumbs();
@@ -49,6 +34,7 @@ function SyllabusForm() {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    getCourseData();
     if (pathname.toLowerCase() === "/coursesubjectivemaster/syllabus/new") {
       setIsNew(true);
       setCrumbs([
@@ -61,128 +47,22 @@ function SyllabusForm() {
       ]);
     } else {
       setIsNew(false);
-      getCourseObjectiveData();
+      getSyllabusObjectiveData();
     }
   }, [pathname]);
 
-  const checks = {
-    objective: [values.description !== ""],
-  };
+  const checks = {};
 
-  const errorMessages = {
-    objective: ["This field required"],
-  };
+  const errorMessages = {};
 
-  const getCourseObjectiveData = async () => {
-    await axios
-      .get(`/api/academic/syllabus/${id}`)
-      .then((res) => {
-        setValues({ courseId: res.data.data[0].course_id });
-        setUpdateData(res.data.data);
+  if (values.length > 0) {
+    values.map((obj, i) => {
+      checks["duration" + i] = [/[0-9]{2}$/.test(obj.duration)];
+      errorMessages["duration" + i] = ["Enter two numbers"];
+    });
+  }
 
-        setcourseObjectiveId(res.data.data.syllabus_id);
-        setCrumbs([
-          {
-            name: "CourseSubjectiveMaster",
-            link: "/CourseSubjectiveMaster/Syllabus",
-          },
-          { name: "Syllabus" },
-          { name: "Update" },
-          { name: res.data.data.syllabus_id },
-        ]);
-      })
-      .catch((error) => console.error(error));
-  };
-
-  const handleChange = (e) => {
-    const splitName = e.target.name.split("-");
-
-    setValues((prev) => ({
-      ...prev,
-      courseObjective: prev.courseObjective.map((obj, i) => {
-        if (i === parseInt(splitName[1]))
-          return {
-            ...obj,
-            [splitName[0]]: e.target.value,
-            ["moduleName"]: "Module" + "-" + Number(i + 1),
-          };
-        return obj;
-      }),
-    }));
-  };
-
-  const handleChangeOne = (e) => {
-    setValues((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handleChangeAdvance = async (name, newValue) => {
-    const splitName = name.split("-");
-
-    setValues((prev) => ({
-      ...prev,
-      courseObjective: prev.courseObjective.map((obj, i) => {
-        if (i === parseInt(splitName[1]))
-          return {
-            ...obj,
-            [splitName[0]]: newValue,
-          };
-        return obj;
-      }),
-    }));
-    if (name === "courseId") {
-      await axios
-        .get(`/api/academic/getCoursesConcateWithCodeNameAndYearSem`)
-        .then((res) => {
-          res.data.data
-            .filter((item) => item.course_id === newValue)
-            .map((filteredItem) => {
-              data.courseName = filteredItem.course_name;
-              data.courseCode = filteredItem.course_code;
-            });
-        });
-    }
-    setValues((prev) => ({
-      ...prev,
-      [name]: newValue,
-    }));
-  };
-
-  const add = () => {
-    setValues((prev) => ({
-      ...prev,
-      ["courseObjective"]: prev["courseObjective"].concat({
-        objective: "",
-      }),
-    }));
-  };
-
-  const remove = () => {
-    const temp = values.courseObjective;
-    temp.pop();
-    setValues((prev) => ({
-      ...prev,
-      ["courseObjective"]: temp,
-    }));
-  };
-
-  const requiredFieldsValid = () => {
-    for (let i = 0; i < requiredFields.length; i++) {
-      const field = requiredFields[i];
-      if (Object.keys(checks).includes(field)) {
-        const ch = checks[field];
-        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
-      } else if (!values[field]) return false;
-    }
-    return true;
-  };
-  useEffect(() => {
-    getCourse();
-  }, [values.courseId]);
-
-  const getCourse = async () => {
+  const getCourseData = async () => {
     await axios
       .get(`/api/academic/getCoursesConcateWithCodeNameAndYearSem`)
       .then((res) => {
@@ -196,6 +76,86 @@ function SyllabusForm() {
       .catch((error) => console.error(error));
   };
 
+  const getSyllabusObjectiveData = async () => {
+    await axios
+      .get(`/api/academic/syllabus/${id}`)
+      .then((res) => {
+        setData({ courseId: res.data.data[0].course_id });
+        const updatedData = [];
+        for (let i = 0; i < res.data.data.length; i++) {
+          updatedData.push({
+            syllbusId: res.data.data[i].id,
+            moduleName: res.data.data[i].module,
+            objective: res.data.data[i].syllabus_objective,
+            duration: res.data.data[i].duration,
+          });
+        }
+
+        setValues(updatedData);
+        setCrumbs([
+          {
+            name: "CourseSubjectiveMaster",
+            link: "/CourseSubjectiveMaster/Syllabus",
+          },
+          { name: "Syllabus" },
+          { name: "Update" },
+          { name: res.data.data.syllabus_id },
+        ]);
+      })
+      .catch((error) => console.error(error));
+  };
+
+  const handleChangeAdvance = async (name, newValue) => {
+    if (name === "courseId") {
+      await axios
+        .get(`/api/academic/getCountOfModules/${newValue}`)
+        .then((res) => {
+          setModuleCount(res.data.data);
+        })
+        .catch((error) => console.error(error));
+    }
+    setData((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
+  };
+
+  const handleChange = (e) => {
+    const splitName = e.target.name.split("-");
+    setValues((prev) =>
+      prev.map((obj, i) => {
+        if (i === Number(splitName[1]))
+          return {
+            ...obj,
+            [splitName[0]]: e.target.value,
+            ["moduleName"]: "Module" + "-" + Number(moduleCount + i + 1),
+          };
+        return obj;
+      })
+    );
+  };
+
+  const addRow = () => {
+    setValues((prev) => [...prev, initialValues]);
+  };
+
+  const deleteRow = () => {
+    const filtered = [...values];
+    filtered.pop();
+    setValues(filtered);
+  };
+
+  const requiredFieldsValid = () => {
+    for (let i = 0; i < requiredFields.length; i++) {
+      const field = requiredFields[i];
+      if (Object.keys(checks).includes(field)) {
+        const ch = checks[field];
+        for (let j = 0; j < ch.length; j++) if (!ch[j]) return false;
+      } else if (!values[field]) return false;
+    }
+    return true;
+  };
+
   const handleCreate = async () => {
     if (!requiredFieldsValid()) {
       setAlertMessage({
@@ -206,15 +166,14 @@ function SyllabusForm() {
     } else {
       setLoading(true);
       const temp = [];
-      values.courseObjective.forEach((obj) => {
+
+      values.map((obj) => {
         temp.push({
           active: true,
-          course_id: values.courseId,
+          course_id: data.courseId,
           module: obj.moduleName,
-          duration: obj.hours,
-          syllabus_code: data.courseCode,
+          duration: obj.duration,
           syllabus_objective: obj.objective,
-          syllabus_path: data.courseName,
         });
       });
 
@@ -246,6 +205,7 @@ function SyllabusForm() {
         });
     }
   };
+
   const handleUpdate = async () => {
     if (!requiredFieldsValid()) {
       setAlertMessage({
@@ -255,15 +215,18 @@ function SyllabusForm() {
       setAlertOpen(true);
     } else {
       setLoading(true);
-      const temp = {};
-      temp.active = true;
-      temp.course_objective_id = courseObjectiveId;
-      temp.course_id = values.courseId;
-      temp.syllabus_objective = values.objectiveUpdate;
-      temp.syllabus_code = data.syllabusCode;
-      temp.syllabus_path = data.syllabusPath;
-      temp.syllabus_id = data.syllabusId;
-      temp.duration = data.duration;
+      const temp = [];
+
+      values.map((obj) => {
+        temp.push({
+          active: true,
+          syllabus_id: obj.syllbusId,
+          course_id: data.courseId,
+          module: obj.moduleName,
+          duration: obj.duration,
+          syllabus_objective: obj.objective,
+        });
+      });
 
       await axios
         .put(`/api/academic/syllabus/${id}`, temp)
@@ -295,159 +258,137 @@ function SyllabusForm() {
   };
 
   return (
-    <Box component="form" overflow="hidden" p={1}>
-      <FormWrapper>
-        <Grid
-          container
-          alignItems="center"
-          justifyContent="flex-start"
-          columnSpacing={{ xs: 2, md: 8 }}
-        >
-          <Grid item md={4} alignItems="center">
-            <CustomAutocomplete
-              name="courseId"
-              label="Course"
-              value={values.courseId}
-              options={courseOptions}
-              handleChangeAdvance={handleChangeAdvance}
-              disabled={!isNew}
-              required
-            />
+    <>
+      <Box component="form" overflow="hidden" p={1}>
+        <FormWrapper>
+          <Grid
+            container
+            alignItems="center"
+            justifyContent="flex-start"
+            rowSpacing={4}
+            columnSpacing={{ xs: 2, md: 4 }}
+          >
+            <Grid item xs={12} md={4}>
+              <CustomAutocomplete
+                name="courseId"
+                label="Course"
+                value={data.courseId}
+                options={courseOptions}
+                handleChangeAdvance={handleChangeAdvance}
+                disabled={!isNew}
+                required
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={1}></Grid>
-          {isNew ? (
-            values.courseObjective.map((obj, i) => {
+          <Grid
+            container
+            justifyContent="flex-start"
+            alignItems="center"
+            rowSpacing={4}
+            columnSpacing={{ xs: 2, md: 4 }}
+          >
+            {values.map((obj, i) => {
               return (
                 <>
-                  <Grid item xs={12} md={8} mt={2.5}>
+                  <Grid item xs={12} md={8} mt={2} key={i}>
                     <CustomTextField
-                      rows={2.5}
+                      rows={4}
                       multiline
-                      inputProps={{
-                        minLength: 1,
-                        maxLength: 500,
-                      }}
-                      label={"Module " + Number(i + 1)}
                       name={"objective" + "-" + i}
-                      value={values.courseObjective[i]["objective"]}
+                      label={"Module" + "-" + Number(moduleCount + i + 1)}
+                      value={obj.objective}
                       handleChange={handleChange}
+                      required
                     />
                   </Grid>
-                  <Grid item xs={12} md={4} mt={2.5}>
+                  <Grid item xs={12} md={4} mt={2}>
                     <CustomTextField
-                      name={"hours" + "-" + i}
-                      label="Duration (Hrs)"
-                      value={values.courseObjective[i]["hours"]}
+                      name={"duration" + "-" + i}
+                      label="Duration (hrs)"
+                      value={obj.duration}
                       handleChange={handleChange}
+                      checks={checks["duration" + i]}
+                      errors={errorMessages["duration" + i]}
+                      inputProps={{
+                        maxLength: 2,
+                      }}
                       required
                     />
                   </Grid>
                 </>
               );
-            })
-          ) : (
-            <>
-              {updateData.map((obj, i) => {
-                return (
-                  <>
-                    <Grid item xs={12} md={8} mt={2.5}>
-                      <CustomTextField
-                        rows={4}
-                        multiline
-                        label={"Module" + "-" + i}
-                        value={obj.syllabus_objective}
-                        handleChange={handleChange}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                      <CustomTextField
-                        name={"hoursUpdate" + "-" + i}
-                        label="Duration (Hrs)"
-                        value={obj.duration}
-                        handleChangeAdvance={handleChangeAdvance}
-                        inputProps={{
-                          minLength: 2,
-                          maxLength: 2,
-                        }}
-                        required
-                      />
-                    </Grid>
-                  </>
-                );
-              })}
-
-              {/* <Grid item xs={12} md={8} mt={2.5}>
-                <CustomTextField
-                  rows={2.5}
-                  multiline
-                  inputProps={{
-                    minLength: 1,
-                    maxLength: 500,
-                  }}
-                  label={"Module"}
-                  name={"objectiveUpdate"}
-                  value={values.objectiveUpdate}
-                  handleChange={handleChangeOne}
-                />
-              </Grid>
-              <Grid item xs={12} md={4} mt={2.5}>
-                <CustomTextField
-                  name="hoursUpdate"
-                  label="Duration (Hrs)"
-                  value={values.hoursUpdate}
-                  handleChangeAdvance={handleChangeAdvance}
-                  inputProps={{
-                    minLength: 2,
-                    maxLength: 2,
-                  }}
-                  required
-                />
-              </Grid> */}
-            </>
-          )}
-          {isNew ? (
-            <Grid item xs={12} align="right">
-              <Button
-                variant="contained"
-                color="error"
-                onClick={remove}
-                disabled={values.courseObjective.length === 1}
-                style={{ marginRight: "10px" }}
-              >
-                <RemoveIcon />
-              </Button>
-
-              <Button variant="contained" color="success" onClick={add}>
-                <AddIcon />
-              </Button>
-            </Grid>
-          ) : (
-            <></>
-          )}
-          <Grid item xs={12} textAlign="right" mt={3}>
-            <Button
-              style={{ borderRadius: 7 }}
-              variant="contained"
-              color="primary"
-              disabled={loading}
-              onClick={isNew ? handleCreate : handleUpdate}
-            >
-              {loading ? (
-                <CircularProgress
-                  size={25}
-                  color="blue"
-                  style={{ margin: "2px 13px" }}
-                />
-              ) : (
-                <strong>{isNew ? "Create" : "Update"}</strong>
-              )}
-            </Button>
+            })}
           </Grid>
-        </Grid>
-      </FormWrapper>
-    </Box>
+
+          <Grid container rowSpacing={5} justifyContent="flex-end">
+            {isNew ? (
+              <>
+                <Grid item xs={12} textAlign="right">
+                  <Button
+                    variant="contained"
+                    color="success"
+                    sx={{
+                      borderRadius: 2,
+                      marginRight: "10px",
+                    }}
+                    onClick={addRow}
+                  >
+                    <AddIcon />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    sx={{
+                      borderRadius: 2,
+                    }}
+                    onClick={deleteRow}
+                  >
+                    <RemoveIcon />
+                  </Button>
+                </Grid>
+                <Grid item xs={12} textAlign="right">
+                  <Button
+                    style={{ borderRadius: 7 }}
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCreate}
+                  >
+                    {loading ? (
+                      <CircularProgress
+                        size={25}
+                        color="blue"
+                        style={{ margin: "2px 13px" }}
+                      />
+                    ) : (
+                      <strong>{"Create"}</strong>
+                    )}
+                  </Button>
+                </Grid>
+              </>
+            ) : (
+              <Grid item xs={12} textAlign="right">
+                <Button
+                  style={{ borderRadius: 7 }}
+                  variant="contained"
+                  color="primary"
+                  onClick={handleUpdate}
+                >
+                  {loading ? (
+                    <CircularProgress
+                      size={25}
+                      color="blue"
+                      style={{ margin: "2px 13px" }}
+                    />
+                  ) : (
+                    <strong>{"Update"}</strong>
+                  )}
+                </Button>
+              </Grid>
+            )}
+          </Grid>
+        </FormWrapper>
+      </Box>
+    </>
   );
 }
-
 export default SyllabusForm;

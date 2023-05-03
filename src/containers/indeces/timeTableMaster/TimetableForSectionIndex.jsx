@@ -1,16 +1,39 @@
 import { useState, useEffect } from "react";
-import { Box, Button, IconButton, Grid, Typography } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Button,
+  IconButton,
+  Grid,
+  TableCell,
+  TableContainer,
+  Table,
+  TableRow,
+  TableHead,
+  TableBody,
+  Typography,
+} from "@mui/material";
 import GridIndex from "../../../components/GridIndex";
 import { Check, HighlightOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import SwapHorizontalCircleIcon from "@mui/icons-material/SwapHorizontalCircle";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import CustomModal from "../../../components/CustomModal";
 import axios from "../../../services/Api";
 import FormWrapper from "../../../components/FormWrapper";
 import CustomAutocomplete from "../../../components/Inputs/CustomAutocomplete";
 import ModalWrapper from "../../../components/ModalWrapper";
 import useAlert from "../../../hooks/useAlert";
+import { makeStyles } from "@mui/styles";
+
+const useStyles = makeStyles((theme) => ({
+  bg: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.headerWhite.main,
+    padding: "5px",
+  },
+}));
 
 const initialValues = {
   acYearId: 1,
@@ -35,14 +58,16 @@ function TimetableForSectionIndex() {
   const [ids, setIds] = useState([]);
   const [values, setValues] = useState(initialValues);
   const [academicYearOptions, setAcademicYearOptions] = useState([]);
-  const [employeeDetailsOpen, setEmployeeDetailsOpen] = useState(false);
+  const [employeeOpen, setEmployeeOpen] = useState(false);
   const [employeeOptions, setEmployeeOptions] = useState([]);
   const [courseOptions, setCourseOptions] = useState([]);
   const [previousEmployeeId, setPreviousEmployeeId] = useState(null);
   const [timeTableId, setTimeTableId] = useState(null);
+  const [employeeData, setEmployeeData] = useState([]);
 
   const navigate = useNavigate();
   const { setAlertMessage, setAlertOpen } = useAlert();
+  const classes = useStyles();
 
   const columns = [
     {
@@ -50,7 +75,7 @@ function TimetableForSectionIndex() {
       headerName: "AC Year",
       flex: 1,
     },
-    { field: "school_name_short", headerName: " School Name", flex: 1 },
+
     {
       field: "program_specialization_short_name",
       headerName: "Specialization",
@@ -62,29 +87,39 @@ function TimetableForSectionIndex() {
     },
     {
       field: "",
-      headerName: "Year/Sem",
+      headerName: "Yr/Sem",
       flex: 1,
       valueGetter: (params) =>
         params.row.current_year
           ? params.row.current_year
           : params.row.current_sem,
     },
-    { field: "from_date", headerName: "From Date", flex: 1, hide: true },
-    { field: "to_date", headerName: "To Date", flex: 1, hide: true },
-    { field: "week_day", headerName: "Week Day", flex: 1 },
-    { field: "timeSlots", headerName: "Time Slots", flex: 1 },
+
+    {
+      field: "week_day",
+      headerName: "Day",
+      flex: 1,
+      valueGetter: (params) =>
+        params.row.week_day ? params.row.week_day.slice(0, 3) : "",
+    },
+    { field: "timeSlots", headerName: "Time Slot", flex: 1 },
     {
       field: "interval_type_short",
       headerName: "Interval Type",
       flex: 1,
+      hide: true,
     },
-    {
-      field: "employee_name",
-      headerName: "Employee",
-      flex: 1,
-    },
+
     { field: "course_short_name", headerName: "Course", flex: 1 },
-    { field: "selected_date", headerName: "Selected date", flex: 1 },
+    {
+      field: "selected_date",
+      headerName: "Date",
+      flex: 1,
+      valueGetter: (params) =>
+        params.row.selected_date
+          ? params.row.selected_date.split("-").reverse().join("-")
+          : "",
+    },
     { field: "roomcode", headerName: "Room Code", flex: 1 },
     {
       field: "section_name",
@@ -100,18 +135,18 @@ function TimetableForSectionIndex() {
       valueGetter: (params) =>
         params.row.batch_name ? params.row.batch_name : "NA",
     },
+
     {
-      field: "swap",
-      headerName: "Swap",
+      field: "view",
+      headerName: "Employee",
       flex: 1,
       type: "actions",
       getActions: (params) => [
-        <IconButton onClick={() => handleDetails(params)} color="primary">
-          <SwapHorizontalCircleIcon />
+        <IconButton onClick={() => handleEmployees(params)} color="primary">
+          <AssignmentIndIcon />
         </IconButton>,
       ],
     },
-
     {
       field: "created_username",
       headerName: "Created By",
@@ -151,6 +186,7 @@ function TimetableForSectionIndex() {
       ],
     },
   ];
+
   useEffect(() => {
     getData();
     getAcYearData();
@@ -178,14 +214,7 @@ function TimetableForSectionIndex() {
           `/api/academic/fetchAllTimeTableDetailsForIndex/${values.acYearId}`
         )
         .then((res) => {
-          const mainData = res.data.data.map((obj) => {
-            if (obj.id === null) {
-              return { ...obj, id: obj.time_table_id };
-            } else {
-              return obj;
-            }
-          });
-          setRows(mainData);
+          setRows(res.data.data);
         })
         .catch((err) => console.error(err));
   };
@@ -203,8 +232,6 @@ function TimetableForSectionIndex() {
   };
 
   const handleActive = async (params) => {
-    const id = params.row.id;
-
     const handleToggle = async () => {
       if (params.row.active === true) {
         await axios
@@ -250,9 +277,11 @@ function TimetableForSectionIndex() {
     const handleSectionCreation = () => {
       navigate("/TimetableMaster/Timetable/Section/New");
     };
+
     const handleBatchCreation = () => {
       navigate("/TimetableMaster/Timetable/Batch/New");
     };
+
     setModalSelectOpen(true);
     setModalSelectContent({
       title: "Create Timetable For",
@@ -264,23 +293,31 @@ function TimetableForSectionIndex() {
     });
   };
 
-  const handleDetails = async (params) => {
-    setPreviousEmployeeId(params.row.emp_id);
+  const handleEmployees = async (params) => {
     setTimeTableId(params.row.id);
+    setEmployeeOpen(true);
     await axios
       .get(
-        `/api/employee/getEmployeesUnderDepartment/${params.row.emp_id}/${params.row.selected_date}/${params.row.time_slots_id}`
+        `/api/academic/timeTableEmployeeDetailsOnTimeTableId/${params.row.time_table_id}`
       )
       .then((res) => {
-        setEmployeeOptions(
-          res.data.data.map((obj) => ({
-            value: obj.emp_id,
-            label: obj.employeeName,
-          }))
-        );
+        setPreviousEmployeeId(res.data.data[0].emp_id);
+        setEmployeeData(res.data.data);
+        axios
+          .get(
+            `/api/employee/getEmployeesUnderDepartment/${res.data.data[0].emp_id}/${params.row.selected_date}/${params.row.time_slots_id}`
+          )
+          .then((res) => {
+            setEmployeeOptions(
+              res.data.data.map((obj) => ({
+                value: obj.emp_id,
+                label: obj.employeeName,
+              }))
+            );
+          })
+          .catch((err) => console.error(err));
       })
       .catch((err) => console.error(err));
-    setEmployeeDetailsOpen(true);
   };
 
   const getCourseData = async () => {
@@ -307,8 +344,8 @@ function TimetableForSectionIndex() {
         if (res.status === 200 || res.status === 201) {
           setAlertMessage({ severity: "success", message: "Swapped" });
           setAlertOpen(true);
-          setEmployeeDetailsOpen(false);
-          getData();
+          setEmployeeOpen(false);
+          handleEmployees();
         } else {
           setAlertMessage({ severity: "error", message: "Error" });
           setAlertOpen(true);
@@ -375,39 +412,74 @@ function TimetableForSectionIndex() {
           </Grid>
         </FormWrapper>
         <ModalWrapper
-          maxWidth={800}
-          open={employeeDetailsOpen}
-          setOpen={setEmployeeDetailsOpen}
+          maxWidth={1200}
+          open={employeeOpen}
+          setOpen={setEmployeeOpen}
         >
-          <Grid container rowSpacing={2} columnSpacing={2}>
-            <Grid item xs={12} md={4}>
-              <CustomAutocomplete
-                name="employeeId"
-                label="Employee"
-                value={values.employeeId}
-                options={employeeOptions}
-                handleChangeAdvance={handleChangeAdvance}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <CustomAutocomplete
-                name="courseId"
-                label="Course"
-                value={values.courseId}
-                options={courseOptions}
-                handleChangeAdvance={handleChangeAdvance}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Button
-                variant="contained"
-                sx={{ borderRadius: 2 }}
-                onClick={handleSubmit}
-              >
-                SWAP
-              </Button>
+          <Grid container justifyContent="flex-start">
+            <Grid item xs={12} md={12} mt={2}>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead className={classes.bg}>
+                    <TableRow>
+                      <TableCell sx={{ color: "white", width: 100 }}>
+                        Employee
+                      </TableCell>
+                      <TableCell sx={{ color: "white", width: 100 }}>
+                        Code
+                      </TableCell>
+                      <TableCell sx={{ color: "white", width: 100 }}>
+                        Staff Mapped
+                      </TableCell>
+                      <TableCell sx={{ color: "white", width: 100 }}>
+                        Course
+                      </TableCell>
+                      <TableCell sx={{ color: "white", width: 100 }}>
+                        Swap
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {employeeData.map((obj, i) => {
+                      return (
+                        <TableRow key={i}>
+                          <TableCell>{obj.employee_name}</TableCell>
+                          <TableCell>{obj.empcode}</TableCell>
+                          <TableCell>
+                            <CustomAutocomplete
+                              name="employeeId"
+                              label=""
+                              value={values.employeeId}
+                              options={employeeOptions}
+                              handleChangeAdvance={handleChangeAdvance}
+                              required
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <CustomAutocomplete
+                              name="courseId"
+                              label=""
+                              value={values.courseId}
+                              options={courseOptions}
+                              handleChangeAdvance={handleChangeAdvance}
+                              required
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="contained"
+                              sx={{ borderRadius: 2 }}
+                              onClick={handleSubmit}
+                            >
+                              SWAP
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Grid>
           </Grid>
         </ModalWrapper>

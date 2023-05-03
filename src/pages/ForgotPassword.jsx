@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import CustomTextField from "../components/Inputs/CustomTextField";
 import CustomModal from "../components/CustomModal";
 import useAlert from "../hooks/useAlert";
-import axios from "../services/Api";
+import axios from "../services/ApiWithoutToken";
 
 const styles = makeStyles(() => ({
   container: {
@@ -93,7 +93,7 @@ function ForgotPassword() {
       const temp = {};
       temp.username = storedata.username;
 
-      let path = "http://localhost:3000/ResetPassword?token=";
+      let path = `http://localhost:3000/ResetPassword?token=`;
       await axios
         .post(
           `/api/forgotPassword?url_domain=${path}&username=${storedata.username}`,

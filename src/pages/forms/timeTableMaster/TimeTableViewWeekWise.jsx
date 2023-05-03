@@ -44,7 +44,7 @@ function TimeTableViewWeekWise() {
 
   const [sectionOptions, setSectionOptions] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
-
+  const [allDates, setAllDates] = useState([]);
   const [allTime, setAllTime] = useState([]);
 
   const classes = useStyles();
@@ -190,7 +190,7 @@ function TimeTableViewWeekWise() {
           const weekDays = getWeekDays(new Date(date));
           const dates = [];
           const timesId = [];
-
+          console.log(res.data.data);
           res.data.data.map((obj) => {
             weekDays.filter((obj1) => {
               if (
@@ -220,9 +220,12 @@ function TimeTableViewWeekWise() {
                 times.push({
                   slotId: obj.time_slots_id,
                   slotName: obj.time,
+                  start: obj.start,
                 });
               }
             });
+
+            setAllTime(times);
 
             allDays.forEach((obj) => {
               timesId.forEach((obj1) => {
@@ -234,7 +237,6 @@ function TimeTableViewWeekWise() {
             });
 
             setTimeSlots(tempOne);
-
             setAllTime(times);
           });
         })
@@ -332,65 +334,86 @@ function TimeTableViewWeekWise() {
               mt={1}
             >
               <Grid item xs={12} md={12}>
-                <TableContainer component={Paper}>
-                  <Table size="small">
+                <TableContainer component={Paper} sx={{ position: "sticky" }}>
+                  <Table
+                    size="small"
+                    // fixedHeader={false}
+                    // style={{
+                    //   width: "auto",
+                    //   tableLayout: "auto",
+                    // }}
+                  >
                     <TableHead>
                       <TableRow>
-                        <StyledTableCell sx={{ width: 120 }}>
-                          Day
+                        <StyledTableCell sx={{ width: "10%" }}>
+                          Date
                         </StyledTableCell>
-                        {allTime.map((obj, i) => {
-                          return (
-                            <StyledTableCell sx={{ width: 120 }}>
-                              {obj.slotName}
-                            </StyledTableCell>
-                          );
-                        })}
+
+                        {allTime.length > 0
+                          ? allTime.map((obj, i) => {
+                              return (
+                                <StyledTableCell sx={{ width: "10%" }}>
+                                  {obj.slotName}
+                                </StyledTableCell>
+                              );
+                            })
+                          : ""}
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {allDays.map((obj) => {
-                        return (
-                          <TableRow>
-                            <TableCell sx={{ width: 120 }}>{obj}</TableCell>
-                            {allTime.map((obj1) => {
-                              return (
-                                <TableCell
-                                  sx={{
-                                    width: 110,
-                                    color: "primary.main",
+                      {allDays.length > 0
+                        ? allDays.map((obj, i) => {
+                            return (
+                              <TableRow key={i}>
+                                <StyledTableCell>{obj}</StyledTableCell>
 
-                                    cursor:
-                                      timeSlots[obj + "-" + obj1.slotId]
-                                        .length > 0
-                                        ? "pointer"
-                                        : "",
-                                  }}
-                                  onClick={() =>
-                                    navigate(
-                                      `/TimeTableViewForCourse/${acYearId}/${schoolId}/${programId}/${programSpeId}/${yearsemId}/${sectionId}/${
-                                        timeSlots[obj + "-" + obj1.slotId][0][
-                                          "start"
-                                        ]
-                                      }/${
-                                        timeSlots[obj + "-" + obj1.slotId][0][
-                                          "course_id"
-                                        ]
-                                      }/${programType}`
-                                    )
-                                  }
-                                >
-                                  {timeSlots[obj + "-" + obj1.slotId].length > 0
-                                    ? timeSlots[obj + "-" + obj1.slotId][0][
-                                        "course_name"
-                                      ]
-                                    : "--"}
-                                </TableCell>
-                              );
-                            })}
-                          </TableRow>
-                        );
-                      })}
+                                {allTime.map((obj1) => {
+                                  return (
+                                    <>
+                                      <StyledTableCell
+                                        sx={{
+                                          color: "primary.main",
+
+                                          cursor:
+                                            timeSlots[obj + "-" + obj1.slotId]
+                                              .length > 0
+                                              ? "pointer"
+                                              : "",
+                                        }}
+                                        onClick={() =>
+                                          navigate(
+                                            `/TimeTableViewForCourse/${acYearId}/${schoolId}/${programId}/${programSpeId}/${yearsemId}/${sectionId}/${
+                                              timeSlots[
+                                                obj + "-" + obj1.slotId
+                                              ][0]["start"]
+                                            }/${
+                                              timeSlots[
+                                                obj + "-" + obj1.slotId
+                                              ][0]["course_id"]
+                                            }/${programType}`
+                                          )
+                                        }
+                                      >
+                                        {timeSlots[obj + "-" + obj1.slotId]
+                                          .length > 0
+                                          ? timeSlots[
+                                              obj + "-" + obj1.slotId
+                                            ][0]["course_name"]
+                                            ? timeSlots[
+                                                obj + "-" + obj1.slotId
+                                              ][0]["course_name"]
+                                            : timeSlots[
+                                                obj + "-" + obj1.slotId
+                                              ][0]["interval_type_short"]
+                                          : "--"}
+                                      </StyledTableCell>
+                                    </>
+                                  );
+                                })}
+                              </TableRow>
+                            );
+                          })
+                        : ""}
                     </TableBody>
                   </Table>
                 </TableContainer>

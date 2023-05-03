@@ -25,11 +25,9 @@ const initialValues = {
 };
 
 const requiredFields = [
-  "acYearId",
   "schoolId",
-  "programId",
+  "courseId",
   "programSpeId",
-  "yearsemId",
   "titleOfBook",
   "author",
   "edition",

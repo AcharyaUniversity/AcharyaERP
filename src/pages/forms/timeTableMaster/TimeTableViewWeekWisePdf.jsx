@@ -296,6 +296,10 @@ function TimeTableViewWeekWisePdf() {
                     <Text style={styles.timeTableTdStyle}>
                       {timeSlots[obj + "-" + obj1.slotId].length > 0
                         ? timeSlots[obj + "-" + obj1.slotId][0]["course_name"]
+                          ? timeSlots[obj + "-" + obj1.slotId][0]["course_name"]
+                          : timeSlots[obj + "-" + obj1.slotId][0][
+                              "interval_type_short"
+                            ]
                         : "--"}
                     </Text>
                   </View>
