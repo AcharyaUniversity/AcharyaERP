@@ -54,6 +54,7 @@ const styles = makeStyles(() => ({
     maxWidth: 400,
   },
 }));
+
 function VendorIndex() {
   const [rows, setRows] = useState([]);
   const [modalContent, setModalContent] = useState({

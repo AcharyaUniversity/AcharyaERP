@@ -14,8 +14,9 @@ const initialValues = {
   shortName: "",
   admissionCategoryId: "",
   boardId: "",
-  approvedStatus: "No",
+  approvedStatus: false,
 };
+
 const requiredFields = [
   "admSubcategoryName",
   "shortName",
@@ -294,8 +295,8 @@ function AdmSubcategoryForm() {
               label="Approved Intake"
               value={values.approvedStatus}
               items={[
-                { value: "No", label: "No" },
-                { value: "Yes", label: "Yes" },
+                { value: true, label: "Yes" },
+                { value: false, label: "No" },
               ]}
               handleChange={handleChange}
               required

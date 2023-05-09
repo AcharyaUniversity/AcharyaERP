@@ -64,12 +64,12 @@ function SyllabusForm() {
 
   const getCourseData = async () => {
     await axios
-      .get(`/api/academic/getCoursesConcateWithCodeNameAndYearSem`)
+      .get(`/api/academic/getCoursesForSyllabus`)
       .then((res) => {
         setCourseOptions(
           res.data.data.map((obj) => ({
             value: obj.course_id,
-            label: obj.course,
+            label: obj.courseconcat,
           }))
         );
       })

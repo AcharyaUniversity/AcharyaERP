@@ -141,6 +141,7 @@ function SessionMarksEntry() {
         tempOne.push(obj);
         temp.push({ marksEntry: 0, id: obj.school_id, percentage: 0 });
       });
+
       setChecking(tempOne);
       setValues((prev) => ({ ...prev, ["mainData"]: temp }));
     });

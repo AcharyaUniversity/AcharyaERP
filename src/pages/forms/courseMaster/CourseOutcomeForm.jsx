@@ -60,16 +60,14 @@ function CourseOutcomeForm() {
 
   const checks = {};
 
-  const errorMessages = {};
-
   const getCourseData = async () => {
     await axios
-      .get(`/api/academic/getCoursesConcateWithCodeNameAndYearSem`)
+      .get(`/api/academic/getCoursesForOutCome`)
       .then((res) => {
         setCourseOptions(
           res.data.data.map((obj) => ({
             value: obj.course_id,
-            label: obj.course,
+            label: obj.courseconcat,
           }))
         );
       })
@@ -119,16 +117,14 @@ function CourseOutcomeForm() {
 
   const handleChangeAdvance = async (name, newValue) => {
     if (name === "courseId") {
-      await axios
-        .get(`/api/academic/getCoursesConcateWithCodeNameAndYearSem`)
-        .then((res) => {
-          res.data.data
-            .filter((item) => item.course_id === newValue)
-            .map((filteredItem) => {
-              data.courseName = filteredItem.course_name;
-              data.courseCode = filteredItem.course_code;
-            });
-        });
+      await axios.get(`/api/academic/getCoursesForOutCome`).then((res) => {
+        res.data.data
+          .filter((item) => item.course_id === newValue)
+          .map((filteredItem) => {
+            data.courseName = filteredItem.course_name;
+            data.courseCode = filteredItem.course_code;
+          });
+      });
 
       await axios
         .get(`/api/academic/getCountOfOutcome/${newValue}`)

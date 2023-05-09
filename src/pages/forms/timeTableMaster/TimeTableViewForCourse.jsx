@@ -42,6 +42,8 @@ function TimeTableViewForCourse() {
   const [programOptions, setProgramOptions] = useState(null);
   const [sectionOptions, setSectionOptions] = useState(null);
   const [courseData, setCourseData] = useState([]);
+  const [employeeName, setEmployeeName] = useState();
+  const [employeeCode, setEmployeeCode] = useState();
 
   const classes = useStyles();
   const { acYearId } = useParams();
@@ -53,6 +55,7 @@ function TimeTableViewForCourse() {
   const { date } = useParams();
   const { courseId } = useParams();
   const { programType } = useParams();
+  const { timetableId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,6 +67,7 @@ function TimeTableViewForCourse() {
 
   useEffect(() => {
     getProgramSpeData();
+    getEmployeeDetails();
   }, [schoolId]);
 
   const getAcademicyear = async () => {
@@ -148,6 +152,18 @@ function TimeTableViewForCourse() {
             setSectionOptions(obj.section_name);
           }
         });
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const getEmployeeDetails = async () => {
+    await axios
+      .get(
+        `/api/employee/employeeDetailsForTimeTableView/${timetableId}/${date}`
+      )
+      .then((res) => {
+        setEmployeeName(res.data.data[0].employee_name);
+        setEmployeeCode(res.data.data[0].empcode);
       })
       .catch((err) => console.error(err));
   };
@@ -254,10 +270,8 @@ function TimeTableViewForCourse() {
                                     .join("-")
                                 : ""}
                             </StyledTableCell>
-                            <StyledTableCell>
-                              {obj.employee_name}
-                            </StyledTableCell>
-                            <StyledTableCell>{obj.empcode}</StyledTableCell>
+                            <StyledTableCell>{employeeName}</StyledTableCell>
+                            <StyledTableCell>{employeeCode}</StyledTableCell>
                             <StyledTableCell>{obj.course_code}</StyledTableCell>
                             <StyledTableCell>{obj.course_name}</StyledTableCell>
                             <StyledTableCell>{obj.week_day}</StyledTableCell>

@@ -1990,7 +1990,7 @@ function App() {
 
                 <Route
                   exact
-                  path="/TimeTableViewForCourse/:acYearId/:schoolId/:programId/:programSpeId/:yearsemId/:sectionId/:date/:courseId/:programType"
+                  path="/TimeTableViewForCourse/:acYearId/:schoolId/:programId/:programSpeId/:yearsemId/:sectionId/:date/:courseId/:programType/:timetableId"
                   element={<TimeTableViewForCourse />}
                 />
 

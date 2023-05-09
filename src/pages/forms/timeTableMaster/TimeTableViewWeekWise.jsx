@@ -44,7 +44,6 @@ function TimeTableViewWeekWise() {
 
   const [sectionOptions, setSectionOptions] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
-  const [allDates, setAllDates] = useState([]);
   const [allTime, setAllTime] = useState([]);
 
   const classes = useStyles();
@@ -190,7 +189,7 @@ function TimeTableViewWeekWise() {
           const weekDays = getWeekDays(new Date(date));
           const dates = [];
           const timesId = [];
-          console.log(res.data.data);
+
           res.data.data.map((obj) => {
             weekDays.filter((obj1) => {
               if (
@@ -335,14 +334,7 @@ function TimeTableViewWeekWise() {
             >
               <Grid item xs={12} md={12}>
                 <TableContainer component={Paper} sx={{ position: "sticky" }}>
-                  <Table
-                    size="small"
-                    // fixedHeader={false}
-                    // style={{
-                    //   width: "auto",
-                    //   tableLayout: "auto",
-                    // }}
-                  >
+                  <Table size="small">
                     <TableHead>
                       <TableRow>
                         <StyledTableCell sx={{ width: "10%" }}>
@@ -390,7 +382,11 @@ function TimeTableViewWeekWise() {
                                               timeSlots[
                                                 obj + "-" + obj1.slotId
                                               ][0]["course_id"]
-                                            }/${programType}`
+                                            }/${programType}/${
+                                              timeSlots[
+                                                obj + "-" + obj1.slotId
+                                              ][0]["id"]
+                                            }`
                                           )
                                         }
                                       >

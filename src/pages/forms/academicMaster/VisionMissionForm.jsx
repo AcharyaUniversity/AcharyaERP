@@ -330,7 +330,6 @@ function VisionMissionForm() {
                 })
               ) : (
                 <>
-                  {" "}
                   <Grid item xs={12} md={6}>
                     <CustomTextField
                       rows={2}

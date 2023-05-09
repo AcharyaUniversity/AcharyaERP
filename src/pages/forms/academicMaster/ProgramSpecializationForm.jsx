@@ -48,7 +48,7 @@ function ProgramSpecializationForm() {
     programSpeName: [values.programSpeName !== ""],
     shortName: [
       values.shortName !== "",
-      /^[A-Za-z ]{3,4}$/.test(values.shortName),
+      /^[A-Za-z ]{1,5}$/.test(values.shortName),
     ],
     auid: [values.auid !== "", /^[A-Za-z ]{1,4}$/.test(values.auid)],
   };
@@ -56,7 +56,8 @@ function ProgramSpecializationForm() {
   const errorMessages = {
     programSpeName: ["This field is required"],
     shortName: [
-      ["This field required", "Enter characters length between 1 to 4"],
+      "This field required",
+      "Enter characters length between 1 to 5",
     ],
     auid: [
       "This field required",

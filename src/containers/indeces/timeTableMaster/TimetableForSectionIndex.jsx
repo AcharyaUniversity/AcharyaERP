@@ -17,7 +17,6 @@ import GridIndex from "../../../components/GridIndex";
 import { Check, HighlightOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import SwapHorizontalCircleIcon from "@mui/icons-material/SwapHorizontalCircle";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import CustomModal from "../../../components/CustomModal";
 import axios from "../../../services/Api";
@@ -32,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.headerWhite.main,
     padding: "5px",
+    textAlign: "center",
   },
 }));
 
@@ -64,6 +64,8 @@ function TimetableForSectionIndex() {
   const [previousEmployeeId, setPreviousEmployeeId] = useState(null);
   const [timeTableId, setTimeTableId] = useState(null);
   const [employeeData, setEmployeeData] = useState([]);
+  const [modalContentOpen, setModalContentOpen] = useState(false);
+  const [data, setData] = useState([]);
 
   const navigate = useNavigate();
   const { setAlertMessage, setAlertOpen } = useAlert();
@@ -114,19 +116,39 @@ function TimetableForSectionIndex() {
     {
       field: "selected_date",
       headerName: "Date",
+
+      type: "actions",
+      width: 220,
       flex: 1,
-      valueGetter: (params) =>
-        params.row.selected_date
-          ? params.row.selected_date.split("-").reverse().join("-")
-          : "",
+      renderCell: (params) => {
+        return (
+          <Box sx={{ width: "100%" }}>
+            <Typography
+              variant="subtitle2"
+              component="span"
+              color="primary.main"
+              sx={{ cursor: "pointer" }}
+              onClick={() => handleDetails(params)}
+            >
+              {params.row.selected_date
+                ? params.row.selected_date.split("-").reverse().join("-")
+                : ""}
+            </Typography>
+          </Box>
+        );
+      },
     },
     { field: "roomcode", headerName: "Room Code", flex: 1 },
     {
       field: "section_name",
       headerName: "Section",
       flex: 1,
-      valueGetter: (params) =>
-        params.row.section_name ? params.row.section_name : "NA",
+      type: "actions",
+      getActions: (params) => [
+        <Typography sx={{ fontSize: 12 }}>
+          {params.row.section_name ? params.row.section_name : "NA"}
+        </Typography>,
+      ],
     },
     {
       field: "batch_name",
@@ -327,12 +349,18 @@ function TimetableForSectionIndex() {
         .then((res) => {
           setCourseOptions(
             res.data.data.map((obj) => ({
-              value: obj.course_id,
+              value: obj.subjet_assign_id,
               label: obj.course_name_with_code,
             }))
           );
         })
         .catch((error) => console.error(error));
+  };
+
+  const handleDetails = (params) => {
+    setModalContentOpen(true);
+    const allData = rows.filter((obj) => obj.id === params.row.id);
+    setData(allData[0]);
   };
 
   const handleSubmit = async () => {
@@ -346,6 +374,7 @@ function TimetableForSectionIndex() {
           setAlertOpen(true);
           setEmployeeOpen(false);
           handleEmployees();
+          window.location.reload();
         } else {
           setAlertMessage({ severity: "error", message: "Error" });
           setAlertOpen(true);
@@ -482,6 +511,124 @@ function TimetableForSectionIndex() {
               </TableContainer>
             </Grid>
           </Grid>
+        </ModalWrapper>
+        <ModalWrapper
+          open={modalContentOpen}
+          setOpen={setModalContentOpen}
+          maxWidth={800}
+        >
+          <Box sx={{ mt: 3 }}>
+            <Grid container rowSpacing={2}>
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" className={classes.bg}>
+                  Time Table Details
+                </Typography>
+              </Grid>
+              <Grid item xs={12} component={Paper} elevation={3} mt={1} p={2}>
+                <Grid container rowSpacing={2}>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">AC Year</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.ac_year}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">School</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.school_name_short}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Program</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.program_short_name}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Specialization</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.program_specialization_short_name}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Yr/Sem</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.current_year ? data.current_year : data.current_sem}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Section</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.section_name}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Date</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.selected_date
+                        ? data.selected_date.split("-").reverse().join("-")
+                        : ""}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Day</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.week_day}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Course</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.course_short_name ? data.course_short_name : "NA"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Time Slot</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.timeSlots}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Interval Type</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.interval_type_short}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <Typography variant="subtitle2">Room</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.5}>
+                    <Typography variant="body2" color="textSecondary">
+                      {data.roomcode ? data.roomcode : "NA"}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Box>
         </ModalWrapper>
       </Box>
     </>

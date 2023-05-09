@@ -130,6 +130,7 @@ function ReferencebookForm() {
           yearOfPublishers: res.data.data.yr_of_Publish,
           publisherDetails: res.data.data.publisher_details,
           booksAvailable: res.data.data.available_books,
+          referenceCode: res.data.data.reference_code,
         });
         setBookId(res.data.data.book_id);
         setCrumbs([
@@ -167,6 +168,7 @@ function ReferencebookForm() {
     yearOfPublishers: [values.yearOfPublishers !== ""],
     publisherDetails: [values.publisherDetails !== ""],
     booksAvailable: [values.booksAvailable !== ""],
+    referenceCode: [/^[a-zA-Z0-9/$&^@!#*()-]{13}$/.test(values.referenceCode)],
   };
 
   const errorMessages = {
@@ -176,6 +178,7 @@ function ReferencebookForm() {
     yearOfPublishers: ["This field is required"],
     publisherDetails: ["This field is required"],
     booksAvailable: ["This field is required"],
+    referenceCode: ["Invalid Reference Code"],
   };
 
   const requiredFieldsValid = () => {
@@ -211,6 +214,7 @@ function ReferencebookForm() {
       temp.yr_of_Publish = values.yearOfPublishers;
       temp.publisher_details = values.publisherDetails;
       temp.available_books = values.booksAvailable;
+      temp.reference_code = values.referenceCode;
 
       await axios
         .post(`/api/academic/ReferenceBooks`, temp)
@@ -266,6 +270,8 @@ function ReferencebookForm() {
       temp.yr_of_Publish = values.yearOfPublishers;
       temp.publisher_details = values.publisherDetails;
       temp.available_books = values.booksAvailable;
+      temp.reference_code = values.referenceCode;
+
       await axios
         .put(`/api/academic/ReferenceBooks/${id}`, temp)
         .then((res) => {
@@ -412,6 +418,8 @@ function ReferencebookForm() {
               label="ISBN Code"
               value={values.referenceCode}
               handleChange={handleChange}
+              checks={checks.referenceCode}
+              errors={errorMessages.referenceCode}
             />
           </Grid>
 

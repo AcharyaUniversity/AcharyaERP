@@ -72,10 +72,10 @@ function CourseObjectiveForm() {
       .get(`/api/academic/courseObjective/${id}`)
       .then((res) => {
         setValues({
-          courseId: res.data.data.course_id,
-          objectiveUpdate: res.data.data.course_objective,
+          courseId: res.data.data[0].course_id,
+          objectiveUpdate: res.data.data[0].course_objective,
         });
-        setcourseObjectiveId(res.data.data.course_objective_id);
+        setcourseObjectiveId(res.data.data[0].course_objective_id);
         setCrumbs([
           {
             name: "CourseSubjectiveMaster",
@@ -115,7 +115,7 @@ function CourseObjectiveForm() {
   const handleChangeAdvance = async (name, newValue) => {
     if (name === "courseId") {
       await axios
-        .get(`/api/academic/getCoursesConcateWithCodeNameAndYearSem`)
+        .get(`/api/academic/getCoursesForObjective`)
         .then((res) => {
           res.data.data
             .filter((item) => item.course_id === newValue)
@@ -139,6 +139,7 @@ function CourseObjectiveForm() {
       }),
     }));
   };
+
   const remove = (index) => {
     const temp = values.courseObjective;
     temp.pop();
@@ -164,12 +165,12 @@ function CourseObjectiveForm() {
 
   const getCourse = async () => {
     await axios
-      .get(`/api/academic/getCoursesConcateWithCodeNameAndYearSem`)
+      .get(`/api/academic/getCoursesForObjective`)
       .then((res) => {
         setCourseOptions(
           res.data.data.map((obj) => ({
             value: obj.course_id,
-            label: obj.course,
+            label: obj.courseconcat,
           }))
         );
       })
@@ -223,6 +224,7 @@ function CourseObjectiveForm() {
         });
     }
   };
+
   const handleUpdate = async () => {
     if (!requiredFieldsValid()) {
       setAlertMessage({
@@ -232,11 +234,13 @@ function CourseObjectiveForm() {
       setAlertOpen(true);
     } else {
       setLoading(true);
-      const temp = {};
-      temp.active = true;
-      temp.course_objective_id = courseObjectiveId;
-      temp.course_id = values.courseId;
-      temp.course_objective = values.objectiveUpdate;
+      const temp = [];
+      temp.push({
+        active: true,
+        course_objective_id: courseObjectiveId,
+        course_id: values.courseId,
+        course_objective: values.objectiveUpdate,
+      });
 
       await axios
         .put(`/api/academic/courseObjectives/${id}`, temp)
@@ -289,7 +293,7 @@ function CourseObjectiveForm() {
                 <>
                   <Grid item xs={12} md={8} mt={2.5}>
                     <CustomTextField
-                      rows={2.5}
+                      rows={4}
                       multiline
                       inputProps={{
                         minLength: 1,
@@ -307,7 +311,7 @@ function CourseObjectiveForm() {
           ) : (
             <Grid item xs={12} md={6} mt={2.5}>
               <CustomTextField
-                rows={2.5}
+                rows={4}
                 multiline
                 inputProps={{
                   minLength: 1,

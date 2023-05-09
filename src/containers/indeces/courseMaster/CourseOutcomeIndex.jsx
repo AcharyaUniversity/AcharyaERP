@@ -1,14 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Button,
-  IconButton,
-  styled,
-  tableCellClasses,
-  TableCell,
-  Grid,
-  TableHead,
-} from "@mui/material";
+import { Box, Button, IconButton, Grid } from "@mui/material";
 import GridIndex from "../../../components/GridIndex";
 import { Check, HighlightOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -22,16 +13,6 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import ModalWrapper from "../../../components/ModalWrapper";
 import { makeStyles } from "@mui/styles";
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.headerWhite.main,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
 
 const useStyles = makeStyles((theme) => ({
   bg: {
