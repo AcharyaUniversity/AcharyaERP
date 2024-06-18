@@ -88,8 +88,8 @@ export const EmployeeTypeConfirm = ({
 
   const isEmployeeStatusActive = () => {
     new Date().getDate() > new Date(probationEndDate).getDate() &&
-    new Date().getMonth() + 1 > new Date(probationEndDate).getMonth() + 1 &&
-    new Date().getFullYear() > new Date(probationEndDate).getFullYear()
+    new Date().getMonth() + 1 >= new Date(probationEndDate).getMonth() + 1 &&
+    new Date().getFullYear() >= new Date(probationEndDate).getFullYear()
       ? setInputEnabled(true)
       : new Date().getTime() < new Date(probationEndDate).getTime()
       ? setInputEnabled(false)
