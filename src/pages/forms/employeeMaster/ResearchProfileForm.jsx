@@ -444,6 +444,7 @@ function ResearchProfileForm() {
                   name="phdRegisterDate"
                   label="Register Date"
                   value={values.phdRegisterDate}
+                  disableFuture
                   handleChangeAdvance={handleDatePicker}
                   checks={checks.phdRegisterDate}
                   errors={errorMessages.phdRegisterDate}
