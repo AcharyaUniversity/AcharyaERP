@@ -510,7 +510,7 @@ function ResearchProfileForm() {
               <Grid item xs={12} md={4}>
                 <CustomTextField
                   name="noOfConferences"
-                  label="Number If Conferences"
+                  label="Number Of Conferences"
                   value={values.noOfConferences}
                   handleChange={handleChange}
                   checks={checks.noOfConferences}

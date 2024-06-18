@@ -279,6 +279,18 @@ function EmployeeIndex() {
       hideable: false,
     },
     {
+      field: "jobType",
+      headerName: "Job Type Change",
+      flex: 1,
+      type: "actions",
+      hide:true,
+      getActions: (params) => [
+        <IconButton color="primary" onClick={() => onClickJobType(params)}>
+          <EditIcon />
+        </IconButton>,
+      ],
+    },
+    {
       field: "date_of_joining",
       headerName: "DOJ",
       flex: 1,
@@ -378,19 +390,7 @@ function EmployeeIndex() {
           <SwapHorizIcon />
         </IconButton>,
       ],
-    },
-    {
-      field: "jobType",
-      headerName: "Job Type Change",
-      flex: 1,
-      type: "actions",
-      hide:true,
-      getActions: (params) => [
-        <IconButton color="primary" onClick={() => onClickJobType(params)}>
-          <EditIcon />
-        </IconButton>,
-      ],
-    },
+    }
   ];
 
   if (roleName === "Superadmin") {
