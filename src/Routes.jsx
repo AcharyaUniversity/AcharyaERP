@@ -40,6 +40,7 @@ const BankMaster = lazy(() => import("./pages/masters/BankMaster.jsx"));
 const NavigationMaster = lazy(() => import("./pages/masters/NavigationMaster"));
 const InstituteMaster = lazy(() => import("./pages/masters/InstituteMaster"));
 const HostelCreationMaster = lazy(() => import("./pages/masters/HostelCreationMaster"));
+const PettyCashMaster = lazy(() => import("./pages/masters/PettyCashMaster"));
 const InventoryMaster = lazy(() => import("./pages/masters/InventoryMaster"));
 const TimeTableMaster = lazy(() =>
   import("./pages/masters/TimeTableMaster.jsx")
@@ -73,7 +74,10 @@ const HostelBlockForm = lazy(() =>
 const HostelRoomForm = lazy(() =>
   import("./pages/forms/hostelCreation/HostelRoomForm")
 );
-
+// Petty Cash
+const PettyCashForm = lazy(() =>
+  import("./pages/forms/pettyCashMaster/PettyCashForm")
+);
 // Institute Master 
 const OrganizationForm = lazy(() =>
   import("./pages/forms/instituteMaster/OrganizationForm")
@@ -1283,6 +1287,44 @@ function RouteConfig() {
             element={
               <Suspense fallback={<OverlayLoader />}>
                 <HostelRoomForm />
+              </Suspense>
+            }
+          />
+           {/* Petty Cash  */}
+            <Route
+            exact
+            path={"/PettyCashMaster"}
+            element={<Navigate replace to="/PettyCashMaster/PettyCash" />}
+          />
+          {[
+            "/PettyCashMaster/PettyCash",
+          ].map((path) => (
+            <Route
+              exact
+              key={path}
+              path={path}
+              element={
+                <Suspense fallback={<OverlayLoader />}>
+                  <PettyCashMaster />
+                </Suspense>
+              }
+            />
+          ))}
+          <Route
+            exact
+            path="/PettyCashMaster/PettyCash/New"
+            element={
+              <Suspense fallback={<OverlayLoader />}>
+                <PettyCashForm />
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/PettyCashMaster/PettyCash/:id"
+            element={
+              <Suspense fallback={<OverlayLoader />}>
+                <PettyCashForm />
               </Suspense>
             }
           />
