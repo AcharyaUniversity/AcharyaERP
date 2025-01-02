@@ -4,6 +4,7 @@ import axios from "../../../services/Api";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useAlert from "../../../hooks/useAlert";
+import logo from "../../../assets/logo4.png";
 
 function StudentRazorPayWindow() {
   const location = useLocation();
@@ -162,9 +163,9 @@ function StudentRazorPayWindow() {
         key: razor_key?.api_key, // Enter the Key ID generated from the Dashboard
         amount: response.data.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
         currency: "INR",
-        name: `${feeName} Fee`,
-        description: "Test Transaction",
-        image: "https://example.com/your_logo",
+        name: `Acharya Institutes`,
+        description: "",
+        image: `${logo}`,
         order_id: response.data.id, // This is a sample Order ID
         handler: function (response) {
           const data = {
@@ -266,14 +267,14 @@ function StudentRazorPayWindow() {
   return (
     <>
       <Grid container justifyContent="center" alignItems="center">
-        <Grid item xs={12} align="center">
+        <Grid item xs={12} md={8} align="center">
           <Paper
             elevation={4}
             sx={{
-              width: "50%",
+              // width: "50%",
               height: "400px",
               textAlign: "center",
-              margin: 20,
+              marginTop: "40px",
               background: "#edeff7",
               borderRadius: 4,
             }}
@@ -287,7 +288,7 @@ function StudentRazorPayWindow() {
               <Grid item xs={12}>
                 <img
                   src={acharyaLogo}
-                  style={{ width: "20%", borderRadius: "8px" }}
+                  style={{ width: "12%", borderRadius: "8px" }}
                 />
               </Grid>
 

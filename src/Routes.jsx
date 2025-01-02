@@ -1341,7 +1341,9 @@ const RegistrationDetails = lazy(() =>
 const StudentAttendanceSummary = lazy(() =>
   import("./pages/forms/studentMaster/StudentAttendanceSummary")
 );
-
+const StudentCoursewiseAttendance = lazy(() =>
+  import("./pages/forms/studentMaster/StudentCoursewiseAttendance")
+);
 // Faculty Details
 
 const FacultyDetails = lazy(() => import("./pages/masters/FacultyDetails.jsx"));
@@ -1447,7 +1449,9 @@ const FeeReceiptDetailsPDF = lazy(() =>
 const FeeReceiptIndex = lazy(() =>
   import("./containers/indeces/studentMaster/StudentFeereceiptIndex")
 );
-
+const FeeReceiptReportIndex = lazy(() =>
+  import("./containers/indeces/studentMaster/StudentFeereceiptReportIndex")
+);
 const BulkFeeReceipt = lazy(() =>
   import("./pages/forms/studentMaster/BulkFeeReceipt")
 );
@@ -7416,6 +7420,15 @@ function RouteConfig() {
               </Suspense>
             }
           />
+          <Route
+            exact
+            path="/student-attendance/coursewise"
+            element={
+              <Suspense fallback={<OverlayLoader />}>
+                <StudentCoursewiseAttendance />
+              </Suspense>
+            }
+          />
           {/* ID Card */}
           <Route
             exact
@@ -7482,7 +7495,7 @@ function RouteConfig() {
             path="/FeeReceiptIndex"
             element={
               <Suspense fallback={<OverlayLoader />}>
-                <FeeReceiptIndex />
+                <FeeReceiptReportIndex />
               </Suspense>
             }
           />
@@ -8355,20 +8368,18 @@ function RouteConfig() {
             path={"/permission"}
             element={<Navigate replace to="/permission-index" />}
           />
-          {["/permission-index", "/permission-fineconcession"].map(
-            (path) => (
-              <Route
-                exact
-                key={path}
-                path={path}
-                element={
-                  <Suspense fallback={<OverlayLoader />}>
-                    <PermissionIndex />
-                  </Suspense>
-                }
-              />
-            )
-          )}
+          {["/permission-index", "/permission-fineconcession"].map((path) => (
+            <Route
+              exact
+              key={path}
+              path={path}
+              element={
+                <Suspense fallback={<OverlayLoader />}>
+                  <PermissionIndex />
+                </Suspense>
+              }
+            />
+          ))}
           <Route
             exact
             path="/budget-filter"
