@@ -1005,7 +1005,7 @@ function StudentProctorIndex() {
                 multiline
                 rows={2}
                 name="minutesOfMeeting"
-                label="Minutes of meeting / Call output"
+                label="Call Summarize"
                 value={values.minutesOfMeeting}
                 handleChange={handleChange}
                 checks={checks.minutesOfMeeting}
