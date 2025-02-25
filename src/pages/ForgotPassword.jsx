@@ -125,7 +125,6 @@ function ForgotPassword() {
     specialCharacterValidation: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [otpSentPhno, setOtpSentPhno] = useState("")
 
   useEffect(() => {
     if (!userModalOpen) {
@@ -180,18 +179,12 @@ function ForgotPassword() {
   };
 
   const sendOTP = (username) => {
-    setOtpSentPhno("")
     axiosNoToken
-      .post(`${API_ENDPOINT}/api/forgotPasswordWhatsapp?username=${username}`)
+      .post(`${API_ENDPOINT}/api/forgotPassword?username=${username}`)
       .then((res) => {
-        const input = res.data.data;
-        const phoneNumber = input.match(/\d{10,}/)[0];
-        const maskedPhoneNumber = phoneNumber.replace(/\d(?=\d{3})/g, '*');
-        const updatedString = input.replace(phoneNumber, maskedPhoneNumber);
-        showAlert("success", updatedString);
+        showAlert("success", res.data.data?.message);
         setUserModalOpen(true);
         setLoading(false);
-        setOtpSentPhno(phoneNumber)
       })
       .catch((err) => {
         console.log(err);
@@ -262,11 +255,10 @@ function ForgotPassword() {
       return showAlert("error", "Please Enter all the fileds");
     setLoading(true);
     axiosNoToken
-      .post(`${API_ENDPOINT}/api/whatsapp/verifyOtp?phone=${otpSentPhno}&otp=${enteredOTP}`)
+      .post(`${API_ENDPOINT}/api/resetPasswordOtpCheckr`, { otp: enteredOTP })
       .then((res) => {
         setLoading(false);
-        setOtpSentPhno("")
-        if (res.data.success && res.data.data === "otp verified successfully!") setIsValidOtp(true);
+        if (res.data.data?.isCheck) setIsValidOtp(true);
         else showAlert("error", "Incorrect OTP, Please try again!!!");
       })
       .catch((err) => {
