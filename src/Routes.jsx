@@ -184,6 +184,7 @@ const ApproveIncentiveReport = lazy(() =>
 const ExitFormMaster = lazy(() => import("./pages/masters/ExitFormMaster"));
 const FinanceMaster = lazy(() => import("./pages/masters/FinanceMaster.jsx"));
 const PaymentMaster = lazy(() => import("./pages/masters/PaymentMaster"));
+const FeeRecieptDayBookMaster = lazy(() => import("./pages/masters/FeeReceiptMaster.jsx"));
 const StudentPaymentMaster = lazy(() =>
   import("./pages/masters/StudentPaymentMaster.jsx")
 );
@@ -1684,10 +1685,6 @@ const CancelFeeReceipt = lazy(() =>
   import("./pages/forms/studentMaster/CancelFeeReceipt")
 );
 
-const CancelFeeReceiptIndex = lazy(() =>
-  import("./containers/indeces/studentMaster/CancelReceiptIndex.jsx")
-);
-
 const HostelFeeTemplate = lazy(() =>
   import("./pages/indeces/HostelFeeTemplate")
 );
@@ -1811,13 +1808,11 @@ const DirectPayDemandUserIndex = lazy(() =>
 );
 
 const Health = lazy(() => import("./pages/Health.jsx"));
-
 const SalarySheetMaster = lazy(() =>
   import("./pages/indeces/SalarySheetMaster.jsx")
 );
 
 // LMS
-
 const LMS = lazy(() => import("./pages/indeces/LMS.jsx"));
 
 function RouteConfig() {
@@ -1831,7 +1826,7 @@ function RouteConfig() {
           path="/"
           element={
             token ? (
-              <Navigate replace to="/Dashboard" />
+              <Navigate replace to="/Dashboard" />    
             ) : (
               <Navigate replace to="/Login" />
             )
@@ -6069,6 +6064,26 @@ function RouteConfig() {
               </Suspense>
             }
           />
+          <Route
+              exact
+              path={"/feereceipt-create"}
+              element={<Navigate replace to="/feereceipt-create-daybook" />}
+            />
+            {[
+              "/feereceipt-create-daybook",
+              "/feereceipt-create-cancel"
+            ].map((path) => (
+              <Route
+                exact
+                key={path}
+                path={path}
+                element={
+                  <Suspense fallback={<OverlayLoader />}>
+                    <FeeRecieptDayBookMaster />
+                  </Suspense>
+                }
+              />
+            ))}
 
           {/* Payment Master */}
           <>
@@ -6079,7 +6094,6 @@ function RouteConfig() {
             />
             {[
               "/PaymentMaster/Payment",
-              "/PaymentMaster/Feereceipt",
               "/PaymentMaster/Journal",
               "/PaymentMaster/Contra",
               "/PaymentMaster/Salary",
@@ -8315,16 +8329,6 @@ function RouteConfig() {
             element={
               <Suspense fallback={<OverlayLoader />}>
                 <CancelFeeReceipt />
-              </Suspense>
-            }
-          />
-
-          <Route
-            exact
-            path="/CancelFeeReceiptIndex"
-            element={
-              <Suspense fallback={<OverlayLoader />}>
-                <CancelFeeReceiptIndex />
               </Suspense>
             }
           />
